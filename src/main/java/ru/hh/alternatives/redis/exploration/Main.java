@@ -1,11 +1,9 @@
 package ru.hh.alternatives.redis.exploration;
 
 import org.springframework.boot.SpringApplication;
-import ru.hh.common.spring.boot.autoconfigure.HhSpringBootApplication;
-import ru.hh.common.spring.boot.profile.MainProfile;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@HhSpringBootApplication
-@MainProfile
+@SpringBootApplication
 public class Main {
 
   public static void main(String[] args) {

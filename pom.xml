@@ -1,169 +1,33 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
-        <groupId>ru.headhunter.commons</groupId>
-        <artifactId>common-pom</artifactId>
-        <version>3.1.0.spring-boot-rc1</version>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>3.1.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.hh.alternatives.redis</groupId>
-    <artifactId>exploration</artifactId>
+    <artifactId>exploration-redis</artifactId>
     <packaging>pom</packaging>
 
-    <version>3.0.62-SNAPSHOT</version>
-    <name>hh-session project</name>
+    <version>1.0.0-SNAPSHOT</version>
+    <name>exploration-redis</name>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-
-        <service.name>exploration-redis</service.name>
-        <jib.skip.test.execution>true</jib.skip.test.execution>
-        <jib.skip.prod.execution>true</jib.skip.prod.execution>
-
-        <hh-common-config.version>25.0.2.spring-boot-rc1</hh-common-config.version>
     </properties>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>ru.headhunter.commons</groupId>
-                <artifactId>service-common-config-parent</artifactId>
-                <version>${hh-common-config.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>ru.headhunter.commons</groupId>
-            <artifactId>common-spring-boot-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>ru.headhunter.commons</groupId>
-            <artifactId>test-spring-boot-starter</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>ru.hh</groupId>
-                    <artifactId>test-stand-maven-plugin</artifactId>
-                    <version>2.9.0</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>versions-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>ru.hh.checkstyle</groupId>
-                <artifactId>hh-maven-checkstyle-plugin</artifactId>
-                <configuration>
-                    <excludes>/main/java/ru/hh/hh/session/abi/protobuf/SessionProtos.java</excludes>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>com.google.cloud.tools</groupId>
-                <artifactId>jib-maven-plugin</artifactId>
-                <configuration>
-                    <from>
-                        <image>registry.pyn.ru/openjdk17-production:2025.04.09</image>
-                    </from>
-                    <container>
-                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-                        <environment>
-                            <CONFIG_DIR>/etc/${service.name}</CONFIG_DIR>
-                        </environment>
-                        <entrypoint>
-                            <arg>/bin/sh</arg>
-                            <arg>-c</arg>
-                            <arg>exec java $JVM_OPTS -DsettingsDir=$CONFIG_DIR -cp /app/resources:/app/classes:/app/libs/* ru.hh.hh.session.HhSessionApp</arg>
-                        </entrypoint>
-                    </container>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>test</id>
-                        <configuration>
-                            <skip>${jib.skip.test.execution}</skip>
-                            <to>
-                                <!--suppress UnresolvedMavenProperty -->
-                                <image>${env.TESTING_DOCKER_REGISTRY}/${service.name}:${env.IMAGE_VERSION}</image>
-                            </to>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>prod</id>
-                        <configuration>
-                            <skip>${jib.skip.prod.execution}</skip>
-                            <to>
-                                <!--suppress UnresolvedMavenProperty -->
-                                <image>${env.PRODUCTION_DOCKER_REGISTRY}/${service.name}:${env.IMAGE_VERSION}</image>
-                            </to>
-                        </configuration>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-    <profiles>
-        <profile>
-            <id>default</id>
-            <activation>
-                <property>
-                    <name>!env.IMAGE_VERSION</name>
-                </property>
-            </activation>
-            <properties>
-                <env.IMAGE_VERSION>${project.version}</env.IMAGE_VERSION>
-            </properties>
-        </profile>
-        <profile>
-            <id>default_test</id>
-            <activation>
-                <property>
-                    <name>env.TESTING_DOCKER_REGISTRY</name>
-                </property>
-            </activation>
-            <properties>
-                <jib.skip.test.execution>false</jib.skip.test.execution>
-            </properties>
-        </profile>
-        <profile>
-            <id>default_prod</id>
-            <activation>
-                <property>
-                    <name>env.PRODUCTION_DOCKER_REGISTRY</name>
-                </property>
-            </activation>
-            <properties>
-                <jib.skip.prod.execution>false</jib.skip.prod.execution>
-            </properties>
-        </profile>
-    </profiles>
 </project>
