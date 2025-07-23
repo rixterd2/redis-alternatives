@@ -13,6 +13,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 import ru.hh.alternatives.redis.explorationjedis.client.JedisClient;
+import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -22,6 +23,7 @@ public class Benchmarks {
   private static final int PORT = 6379;
 
   private static final KeyValueClient<String, String> jedis = new JedisClient(HOST, PORT);
+  private static final KeyValueClient<String, String> lettuce = new LettuceClient(HOST, PORT);
 
   @Benchmark
   public void testJedisSet() {
@@ -33,6 +35,16 @@ public class Benchmarks {
     jedis.get(UUID.randomUUID().toString());
   }
 
+  @Benchmark
+  public void testLettuceSet() {
+    lettuce.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+  }
+
+  @Benchmark
+  public void testLettuceGet() {
+    lettuce.get(UUID.randomUUID().toString());
+  }
+
   public static void main(String[] args) throws Exception {
     Options opt = new OptionsBuilder()
         .include(Benchmarks.class.getSimpleName())
@@ -42,7 +54,5 @@ public class Benchmarks {
         .build();
 
     new Runner(opt).run();
-
-
   }
 }
