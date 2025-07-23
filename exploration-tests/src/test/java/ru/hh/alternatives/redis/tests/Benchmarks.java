@@ -14,6 +14,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 import ru.hh.alternatives.redis.explorationjedis.client.JedisClient;
 import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
+import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -24,6 +25,7 @@ public class Benchmarks {
 
   private static final KeyValueClient<String, String> jedis = new JedisClient(HOST, PORT);
   private static final KeyValueClient<String, String> lettuce = new LettuceClient(HOST, PORT);
+  private static final KeyValueClient<String, String> redisson = new ExplorationRedissonClient(HOST, PORT);
 
   @Benchmark
   public void testJedisSet() {
@@ -45,6 +47,16 @@ public class Benchmarks {
     lettuce.get(UUID.randomUUID().toString());
   }
 
+  @Benchmark
+  public void testRedissonSet() {
+    redisson.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+  }
+
+  @Benchmark
+  public void testRedissonGet() {
+    redisson.get(UUID.randomUUID().toString());
+  }
+
   public static void main(String[] args) throws Exception {
     Options opt = new OptionsBuilder()
         .include(Benchmarks.class.getSimpleName())
@@ -54,5 +66,9 @@ public class Benchmarks {
         .build();
 
     new Runner(opt).run();
+
+    jedis.close();
+    lettuce.close();
+    redisson.close();
   }
 }
