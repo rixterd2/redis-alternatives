@@ -10,6 +10,7 @@
         <module>exploration-jedis</module>
         <module>exploration-lettuce</module>
         <module>exploration-redisson</module>
+        <module>exploration-utils</module>
     </modules>
 
     <modelVersion>4.0.0</modelVersion>
@@ -24,4 +25,29 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ru.hh.alternatives.redis</groupId>
+                <artifactId>exploration-jedis</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ru.hh.alternatives.redis</groupId>
+                <artifactId>exploration-lettuce</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ru.hh.alternatives.redis</groupId>
+                <artifactId>exploration-redisson</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>ru.hh.alternatives.redis</groupId>
+                <artifactId>exploration-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>

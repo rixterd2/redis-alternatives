@@ -13,6 +13,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>ru.hh.alternatives.redis</groupId>
+            <artifactId>exploration-utils</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
@@ -22,7 +27,6 @@
             <artifactId>lettuce-core</artifactId>
             <version>6.7.1.RELEASE</version> <!-- Check for the latest version on Maven Central -->
         </dependency>
-
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
