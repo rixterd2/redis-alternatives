@@ -1,6 +1,8 @@
 package ru.hh.alternatives.redis.tests.suites;
 
+import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import ru.hh.alternatives.redis.tests.benchmarks.Glide;
@@ -8,8 +10,10 @@ import ru.hh.alternatives.redis.tests.benchmarks.Jedis;
 import ru.hh.alternatives.redis.tests.benchmarks.Lettuce;
 import ru.hh.alternatives.redis.tests.benchmarks.Redisson;
 
-public class All {
-  public static void main(String[] args) throws Exception {
+public class BenchmarkTest {
+
+  @Test
+  public void all() throws RunnerException {
     Options opt = new OptionsBuilder()
         .include(Glide.class.getSimpleName())
         .include(Jedis.class.getSimpleName())
