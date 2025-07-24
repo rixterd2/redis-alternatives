@@ -3,6 +3,7 @@ package ru.hh.alternatives.redis.tests.suites;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import ru.hh.alternatives.redis.tests.benchmarks.Glide;
 import ru.hh.alternatives.redis.tests.benchmarks.Jedis;
 import ru.hh.alternatives.redis.tests.benchmarks.Lettuce;
 import ru.hh.alternatives.redis.tests.benchmarks.Redisson;
@@ -10,6 +11,7 @@ import ru.hh.alternatives.redis.tests.benchmarks.Redisson;
 public class All {
   public static void main(String[] args) throws Exception {
     Options opt = new OptionsBuilder()
+        .include(Glide.class.getSimpleName())
         .include(Jedis.class.getSimpleName())
         .include(Lettuce.class.getSimpleName())
         .include(Redisson.class.getSimpleName())

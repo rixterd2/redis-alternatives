@@ -7,6 +7,7 @@
     </parent>
 
     <modules>
+        <module>exploration-glide</module>
         <module>exploration-jedis</module>
         <module>exploration-lettuce</module>
         <module>exploration-redisson</module>
@@ -29,6 +30,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>ru.hh.alternatives.redis</groupId>
+                <artifactId>exploration-glide</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>ru.hh.alternatives.redis</groupId>
                 <artifactId>exploration-jedis</artifactId>

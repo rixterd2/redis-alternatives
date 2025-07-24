@@ -18,6 +18,10 @@
         </dependency>
         <dependency>
             <groupId>ru.hh.alternatives.redis</groupId>
+            <artifactId>exploration-glide</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ru.hh.alternatives.redis</groupId>
             <artifactId>exploration-jedis</artifactId>
         </dependency>
         <dependency>

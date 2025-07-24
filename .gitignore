@@ -31,6 +31,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 target/
+glide-logs/
 
 ### STS ###
 .apt_generated
