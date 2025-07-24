@@ -11,6 +11,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import ru.hh.alternatives.redis.Constants;
+import ru.hh.alternatives.redis.Utils;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 import ru.hh.alternatives.redis.explorationjedis.client.ExplorationGlideClient;
 import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonClient;
@@ -19,20 +20,25 @@ import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonCl
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
 public class Glide {
-  private static final KeyValueClient<String, String> redisson = new ExplorationGlideClient(Constants.HOST, Constants.PORT);
+  private static final KeyValueClient<String, String> glide = new ExplorationGlideClient(Constants.HOST, Constants.PORT);
 
   @TearDown(Level.Trial)
   public static void tearDown() {
-    redisson.close();
+    glide.close();
   }
 
   @Benchmark
   public void set() {
-    redisson.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    glide.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
   }
 
   @Benchmark
   public void get() {
-    redisson.get(UUID.randomUUID().toString());
+    glide.get(UUID.randomUUID().toString());
+  }
+
+  @Benchmark
+  public void set1Mb() {
+    glide.set(UUID.randomUUID().toString(), Utils.randomString1Mb());
   }
 }

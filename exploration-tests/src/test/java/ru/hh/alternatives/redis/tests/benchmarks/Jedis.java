@@ -1,5 +1,6 @@
 package ru.hh.alternatives.redis.tests.benchmarks;
 
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -11,6 +12,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import ru.hh.alternatives.redis.Constants;
+import ru.hh.alternatives.redis.Utils;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 import ru.hh.alternatives.redis.explorationjedis.client.JedisClient;
 
@@ -33,5 +35,10 @@ public class Jedis {
   @Benchmark
   public void get() {
     jedis.get(UUID.randomUUID().toString());
+  }
+
+  @Benchmark
+  public void set1Mb() {
+    jedis.set(UUID.randomUUID().toString(), Utils.randomString1Mb());
   }
 }

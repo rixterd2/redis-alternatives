@@ -11,6 +11,7 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import ru.hh.alternatives.redis.Constants;
+import ru.hh.alternatives.redis.Utils;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonClient;
 
@@ -33,5 +34,10 @@ public class Redisson {
   @Benchmark
   public void get() {
     redisson.get(UUID.randomUUID().toString());
+  }
+
+  @Benchmark
+  public void set1Mb() {
+    redisson.set(UUID.randomUUID().toString(), Utils.randomString1Mb());
   }
 }
