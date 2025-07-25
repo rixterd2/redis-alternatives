@@ -14,7 +14,6 @@ import ru.hh.alternatives.redis.Constants;
 import ru.hh.alternatives.redis.Utils;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 import ru.hh.alternatives.redis.explorationjedis.client.ExplorationGlideClient;
-import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
