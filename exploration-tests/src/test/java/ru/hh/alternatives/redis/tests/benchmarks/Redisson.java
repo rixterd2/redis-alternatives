@@ -27,13 +27,18 @@ public class Redisson {
   }
 
   @Benchmark
-  public void set() {
-    redisson.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+  public void get() {
+    redisson.get(Utils.randomKey(Constants.KEYS));
   }
 
   @Benchmark
-  public void get() {
-    redisson.get(UUID.randomUUID().toString());
+  public void get1Mb() {
+    redisson.get(Utils.randomKey(Constants.KEYS_1MB));
+  }
+
+  @Benchmark
+  public void set() {
+    redisson.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
   }
 
   @Benchmark

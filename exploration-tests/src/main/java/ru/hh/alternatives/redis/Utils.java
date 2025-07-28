@@ -1,11 +1,17 @@
 package ru.hh.alternatives.redis;
 
+import java.util.Map;
 import java.util.Random;
 
 public class Utils {
   private static final Random RANDOM = new Random();
   // Use characters that are 1 byte in UTF-8 for clean size
   private static final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  public static String randomKey(Map<String, String> map) {
+    int size = map.size();
+    return map.keySet().stream().skip(size - RANDOM.nextInt(size)).findFirst().get();
+  }
 
   public static String randomString1Mb() {
     // char is 2 bytes in size so divide into 2

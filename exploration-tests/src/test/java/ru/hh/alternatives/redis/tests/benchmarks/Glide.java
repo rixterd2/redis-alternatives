@@ -27,13 +27,18 @@ public class Glide {
   }
 
   @Benchmark
-  public void set() {
-    glide.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+  public void get() {
+    glide.get(Utils.randomKey(Constants.KEYS));
   }
 
   @Benchmark
-  public void get() {
-    glide.get(UUID.randomUUID().toString());
+  public void get1Mb() {
+    glide.get(Utils.randomKey(Constants.KEYS_1MB));
+  }
+
+  @Benchmark
+  public void set() {
+    glide.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
   }
 
   @Benchmark

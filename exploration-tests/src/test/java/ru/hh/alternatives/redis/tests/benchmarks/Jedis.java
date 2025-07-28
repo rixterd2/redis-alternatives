@@ -27,13 +27,18 @@ public class Jedis {
   }
 
   @Benchmark
-  public void set() {
-    jedis.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+  public void get() {
+    jedis.get(Utils.randomKey(Constants.KEYS));
   }
 
   @Benchmark
-  public void get() {
-    jedis.get(UUID.randomUUID().toString());
+  public void get1Mb() {
+    jedis.get(Utils.randomKey(Constants.KEYS_1MB));
+  }
+
+  @Benchmark
+  public void set() {
+    jedis.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
   }
 
   @Benchmark

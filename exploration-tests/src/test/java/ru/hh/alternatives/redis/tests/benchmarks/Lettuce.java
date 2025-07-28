@@ -27,13 +27,18 @@ public class Lettuce {
   }
 
   @Benchmark
-  public void set() {
-    lettuce.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+  public void get() {
+    lettuce.get(Utils.randomKey(Constants.KEYS));
   }
 
   @Benchmark
-  public void get() {
-    lettuce.get(UUID.randomUUID().toString());
+  public void get1Mb() {
+    lettuce.get(Utils.randomKey(Constants.KEYS_1MB));
+  }
+
+  @Benchmark
+  public void set() {
+    lettuce.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
   }
 
   @Benchmark
