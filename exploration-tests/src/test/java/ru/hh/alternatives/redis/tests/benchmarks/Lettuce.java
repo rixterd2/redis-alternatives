@@ -8,6 +8,7 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import ru.hh.alternatives.redis.Constants;
@@ -20,6 +21,16 @@ import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
 @State(Scope.Thread)
 public class Lettuce {
   private static final KeyValueClient<String, String> lettuce = new LettuceClient(Constants.HOST, Constants.PORT);
+
+  @Setup(Level.Iteration)
+  public void setupIter() {
+    Utils.setupKeys(lettuce);
+  }
+
+  @TearDown(Level.Iteration)
+  public void tearDownIter() {
+    Utils.cleanupKeys(lettuce);
+  }
 
   @TearDown(Level.Trial)
   public static void tearDown() {
@@ -38,11 +49,15 @@ public class Lettuce {
 
   @Benchmark
   public void set() {
-    lettuce.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    String key = UUID.randomUUID().toString();
+    lettuce.set(key, UUID.randomUUID().toString());
+    Constants.KEYS_TO_REMOVE.put(key, key);
   }
 
   @Benchmark
   public void set1Mb() {
-    lettuce.set(UUID.randomUUID().toString(), Utils.randomString1Mb());
+    String key = UUID.randomUUID().toString();
+    lettuce.set(key, Utils.randomString1Mb());
+    Constants.KEYS_TO_REMOVE.put(key, key);
   }
 }

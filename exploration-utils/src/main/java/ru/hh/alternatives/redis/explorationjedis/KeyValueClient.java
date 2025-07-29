@@ -5,5 +5,7 @@ public interface KeyValueClient<K,V>{
 
   void set(K key, V value);
 
+  void delete(K key);
+
   void close();
 }

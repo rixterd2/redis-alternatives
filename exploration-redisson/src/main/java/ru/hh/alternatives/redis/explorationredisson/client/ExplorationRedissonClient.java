@@ -1,5 +1,6 @@
 package ru.hh.alternatives.redis.explorationredisson.client;
 
+import java.util.Map;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
@@ -22,6 +23,11 @@ public class ExplorationRedissonClient implements KeyValueClient<String, String>
   @Override
   public void set(String key, String value) {
     client.<String>getBucket(key).set(value);
+  }
+
+  @Override
+  public void delete(String key) {
+    client.getBucket(key).delete();
   }
 
   @Override

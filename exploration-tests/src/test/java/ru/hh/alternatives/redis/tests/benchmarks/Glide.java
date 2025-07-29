@@ -8,6 +8,7 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import ru.hh.alternatives.redis.Constants;
@@ -20,6 +21,16 @@ import ru.hh.alternatives.redis.explorationjedis.client.ExplorationGlideClient;
 @State(Scope.Thread)
 public class Glide {
   private static final KeyValueClient<String, String> glide = new ExplorationGlideClient(Constants.HOST, Constants.PORT);
+
+  @Setup(Level.Iteration)
+  public void setupIter() {
+    Utils.setupKeys(glide);
+  }
+
+  @TearDown(Level.Iteration)
+  public void tearDownIter() {
+    Utils.cleanupKeys(glide);
+  }
 
   @TearDown(Level.Trial)
   public static void tearDown() {
@@ -38,11 +49,15 @@ public class Glide {
 
   @Benchmark
   public void set() {
-    glide.set(UUID.randomUUID().toString(), UUID.randomUUID().toString());
+    String key = UUID.randomUUID().toString();
+    glide.set(key, UUID.randomUUID().toString());
+    Constants.KEYS_TO_REMOVE.put(key, key);
   }
 
   @Benchmark
   public void set1Mb() {
-    glide.set(UUID.randomUUID().toString(), Utils.randomString1Mb());
+    String key = UUID.randomUUID().toString();
+    glide.set(key, Utils.randomString1Mb());
+    Constants.KEYS_TO_REMOVE.put(key, key);
   }
 }

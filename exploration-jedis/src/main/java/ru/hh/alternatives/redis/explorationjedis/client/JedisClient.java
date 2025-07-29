@@ -24,6 +24,11 @@ public class JedisClient implements KeyValueClient<String, String> {
   }
 
   @Override
+  public void delete(String key) {
+    resource.del(key);
+  }
+
+  @Override
   public void close() {
     this.resource.close();
     this.jedisPool.close();

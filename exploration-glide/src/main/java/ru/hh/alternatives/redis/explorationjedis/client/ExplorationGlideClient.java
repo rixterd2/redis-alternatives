@@ -8,6 +8,7 @@ import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 
 public class ExplorationGlideClient implements KeyValueClient<String, String> {
   private final GlideClient client;
+  private final String[] keyHolder = new String[1];
 
   public ExplorationGlideClient(String host, int port) {
     GlideClientConfiguration config =
@@ -44,6 +45,12 @@ public class ExplorationGlideClient implements KeyValueClient<String, String> {
     } catch (ExecutionException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void delete(String key) {
+    keyHolder[0] = key;
+    client.del(keyHolder);
   }
 
   @Override
