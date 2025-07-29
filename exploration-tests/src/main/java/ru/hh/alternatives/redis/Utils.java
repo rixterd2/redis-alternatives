@@ -12,7 +12,7 @@ public class Utils {
 
   public static String randomKey(Map<String, String> map) {
     int size = map.size();
-    return map.keySet().stream().skip(size - RANDOM.nextInt(size)).findFirst().get();
+    return map.keySet().stream().skip(RANDOM.nextInt(size)).findFirst().get();
   }
 
   public static String randomString1Mb() {

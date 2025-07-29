@@ -8,6 +8,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.testcontainers.containers.GenericContainer;
+import ru.hh.alternatives.redis.Constants;
 import ru.hh.alternatives.redis.tests.benchmarks.Glide;
 import ru.hh.alternatives.redis.tests.benchmarks.Jedis;
 import ru.hh.alternatives.redis.tests.benchmarks.Lettuce;
@@ -24,8 +25,8 @@ public class BenchmarkTest {
   private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory 256m --maxmemory-policy allkeys-lfu --save '' --appendonly no";
 
   static {
-    redis.setPortBindings(List.of("%d:%d/tcp".formatted(6379, 6379)));
-    valkey.setPortBindings(List.of("%d:%d/tcp".formatted(6379, 6379)));
+    redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
+    valkey.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
   }
 
   @Test
@@ -40,7 +41,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
@@ -62,7 +63,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
@@ -84,7 +85,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
@@ -106,7 +107,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
@@ -129,7 +130,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
@@ -152,7 +153,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
@@ -175,7 +176,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
@@ -198,7 +199,7 @@ public class BenchmarkTest {
           .include(Redisson.class.getSimpleName())
           .warmupIterations(5)
           .measurementIterations(10)
-          .forks(5)
+          .forks(1)
           .build();
       new Runner(opt).run();
     } finally {
