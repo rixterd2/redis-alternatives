@@ -5,6 +5,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import ru.hh.alternatives.redis.tests.benchmarks.Glide;
 import ru.hh.alternatives.redis.tests.benchmarks.Jedis;
 import ru.hh.alternatives.redis.tests.benchmarks.Lettuce;
 import ru.hh.alternatives.redis.tests.benchmarks.Redisson;
@@ -12,8 +13,22 @@ import ru.hh.alternatives.redis.tests.benchmarks.Redisson;
 public class BenchmarkTest {
 
   @Test
-  public void memoryPressure() throws RunnerException {
+  public void redis() throws RunnerException {
     Options opt = new OptionsBuilder()
+        .include(Jedis.class.getSimpleName())
+        .include(Lettuce.class.getSimpleName())
+        .include(Redisson.class.getSimpleName())
+        .warmupIterations(5)
+        .measurementIterations(10)
+        .forks(1)
+        .build();
+    new Runner(opt).run();
+  }
+
+  @Test
+  public void valkey() throws RunnerException {
+    Options opt = new OptionsBuilder()
+        .include(Glide.class.getSimpleName())
         .include(Jedis.class.getSimpleName())
         .include(Lettuce.class.getSimpleName())
         .include(Redisson.class.getSimpleName())
