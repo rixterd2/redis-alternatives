@@ -3,8 +3,10 @@ package ru.hh.alternatives.redis.tests.suites;
 import com.redis.testcontainers.RedisContainer;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.testcontainers.containers.GenericContainer;
@@ -36,13 +38,8 @@ public class BenchmarkTest {
 
     redis.start();
     try {
-      Options opt = new OptionsBuilder()
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+      Options opt = createBuilder()
+          .result("redisInMemoryLRU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -59,13 +56,8 @@ public class BenchmarkTest {
 
     redis.start();
     try {
-      Options opt = new OptionsBuilder()
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+      Options opt = createBuilder()
+          .result("redisInMemoryLFU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -82,13 +74,8 @@ public class BenchmarkTest {
 
     redis.start();
     try {
-      Options opt = new OptionsBuilder()
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+      Options opt = createBuilder()
+          .result("redisInDiskLRU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -105,13 +92,8 @@ public class BenchmarkTest {
 
     redis.start();
     try {
-      Options opt = new OptionsBuilder()
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+      Options opt = createBuilder()
+          .result("redisInDiskLFU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -124,18 +106,13 @@ public class BenchmarkTest {
   @Test
   public void valkeyInMemoryLRU() throws RunnerException {
     System.out.println("Starting valkeyInMemoryLRU");
-    valkey.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LRU));
+    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LRU));
 
     valkey.start();
     try {
-      Options opt = new OptionsBuilder()
+      Options opt = createBuilder()
           .include(Glide.class.getSimpleName())
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+          .result("valkeyInMemoryLRU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -152,14 +129,9 @@ public class BenchmarkTest {
 
     valkey.start();
     try {
-      Options opt = new OptionsBuilder()
+      Options opt = createBuilder()
           .include(Glide.class.getSimpleName())
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+          .result("valkeyInMemoryLFU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -176,14 +148,9 @@ public class BenchmarkTest {
 
     valkey.start();
     try {
-      Options opt = new OptionsBuilder()
+      Options opt = createBuilder()
           .include(Glide.class.getSimpleName())
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+          .result("valkeyInDiskLRU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -200,14 +167,9 @@ public class BenchmarkTest {
 
     valkey.start();
     try {
-      Options opt = new OptionsBuilder()
+      Options opt = createBuilder()
           .include(Glide.class.getSimpleName())
-          .include(Jedis.class.getSimpleName())
-          .include(Lettuce.class.getSimpleName())
-          .include(Redisson.class.getSimpleName())
-          .warmupIterations(5)
-          .measurementIterations(10)
-          .forks(1)
+          .result("valkeyInDiskLFU.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -215,5 +177,16 @@ public class BenchmarkTest {
         valkey.stop();
       }
     }
+  }
+
+  private ChainedOptionsBuilder createBuilder() {
+    return new OptionsBuilder()
+        .include(Jedis.class.getSimpleName())
+        .include(Lettuce.class.getSimpleName())
+        .include(Redisson.class.getSimpleName())
+        .warmupIterations(5)
+        .measurementIterations(10)
+        .resultFormat(ResultFormatType.JSON)
+        .forks(1);
   }
 }
