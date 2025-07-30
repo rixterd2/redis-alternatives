@@ -7,6 +7,7 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import ru.hh.alternatives.redis.Constants;
@@ -20,7 +21,7 @@ import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonCl
 public class RedissonRead {
   private static final KeyValueClient<String, String> redisson = new ExplorationRedissonClient(Constants.HOST, Constants.PORT);
 
-  @TearDown(Level.Trial)
+  @Setup(Level.Trial)
   public static void setup() {
     Utils.setupKeys(redisson);
   }
