@@ -31,6 +31,7 @@ public class BenchmarkTest {
 
   @Test
   public void redisInMemoryLRU() throws RunnerException {
+    System.out.println("Starting redisInMemoryLRU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LRU));
 
     redis.start();
@@ -53,6 +54,7 @@ public class BenchmarkTest {
 
   @Test
   public void redisInMemoryLFU() throws RunnerException {
+    System.out.println("Starting redisInMemoryLFU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LFU));
 
     redis.start();
@@ -75,6 +77,7 @@ public class BenchmarkTest {
 
   @Test
   public void redisInDiskLRU() throws RunnerException {
+    System.out.println("Starting redisInDiskLRU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LRU));
 
     redis.start();
@@ -97,6 +100,7 @@ public class BenchmarkTest {
 
   @Test
   public void redisInDiskLFU() throws RunnerException {
+    System.out.println("Starting redisInDiskLFU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LFU));
 
     redis.start();
@@ -119,6 +123,7 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInMemoryLRU() throws RunnerException {
+    System.out.println("Starting valkeyInMemoryLRU");
     valkey.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LRU));
 
     valkey.start();
@@ -142,6 +147,7 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInMemoryLFU() throws RunnerException {
+    System.out.println("Starting valkeyInMemoryLFU");
     valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LFU));
 
     valkey.start();
@@ -165,6 +171,7 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInDiskLRU() throws RunnerException {
+    System.out.println("Starting valkeyInDiskLRU");
     valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LRU));
 
     valkey.start();
@@ -188,6 +195,7 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInDiskLFU() throws RunnerException {
+    System.out.println("Starting valkeyInDiskLFU");
     valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LFU));
 
     valkey.start();
