@@ -15,8 +15,7 @@ public class ExplorationGlideClient implements KeyValueClient<String, String> {
         GlideClientConfiguration.builder()
             .address(NodeAddress.builder().host(host).port(port).build())
             .useTLS(false)
-            // It is recommended to set a timeout for your specific use case
-            .requestTimeout(500) // 500ms timeout
+            .requestTimeout(1000)
             .build();
     try {
       client = GlideClient.createClient(config).get();
@@ -50,7 +49,13 @@ public class ExplorationGlideClient implements KeyValueClient<String, String> {
   @Override
   public void delete(String key) {
     keyHolder[0] = key;
-    client.del(keyHolder);
+    try {
+      client.del(keyHolder).get();
+    } catch (InterruptedException e) {
+      throw new RuntimeException(e);
+    } catch (ExecutionException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
