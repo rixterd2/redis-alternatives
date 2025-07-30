@@ -1,7 +1,9 @@
 package ru.hh.alternatives.redis.explorationredisson.client;
 
+import java.time.Duration;
 import java.util.Map;
 import org.redisson.Redisson;
+import org.redisson.api.RBucket;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
@@ -23,6 +25,13 @@ public class ExplorationRedissonClient implements KeyValueClient<String, String>
   @Override
   public void set(String key, String value) {
     client.<String>getBucket(key).set(value);
+  }
+
+  @Override
+  public void setAndExpire(String key, String value, long seconds) {
+    RBucket<Object> bucket = client.getBucket(key);
+    bucket.set(value);
+    bucket.expire(Duration.ofSeconds(seconds));
   }
 
   @Override

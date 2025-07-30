@@ -1,6 +1,5 @@
 package ru.hh.alternatives.redis.tests.benchmarks;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -19,21 +18,17 @@ import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
-public class Lettuce {
+public class LettuceRead {
   private static final KeyValueClient<String, String> lettuce = new LettuceClient(Constants.HOST, Constants.PORT);
 
-  @Setup(Level.Iteration)
-  public void setupIter() {
+  @Setup(Level.Trial)
+  public static void setup() {
     Utils.setupKeys(lettuce);
-  }
-
-  @TearDown(Level.Iteration)
-  public void tearDownIter() {
-    Utils.cleanupKeys(lettuce);
   }
 
   @TearDown(Level.Trial)
   public static void tearDown() {
+    Utils.cleanupKeys(lettuce);
     lettuce.close();
   }
 
@@ -45,19 +40,5 @@ public class Lettuce {
   @Benchmark
   public void get1Mb() {
     lettuce.get(Utils.randomKey(Constants.KEYS_1MB));
-  }
-
-  @Benchmark
-  public void set() {
-    String key = UUID.randomUUID().toString();
-    lettuce.set(key, UUID.randomUUID().toString());
-    Constants.KEYS_TO_REMOVE.put(key, key);
-  }
-
-  @Benchmark
-  public void set1Mb() {
-    String key = UUID.randomUUID().toString();
-    lettuce.set(key, Utils.randomString1Mb());
-    Constants.KEYS_TO_REMOVE.put(key, key);
   }
 }

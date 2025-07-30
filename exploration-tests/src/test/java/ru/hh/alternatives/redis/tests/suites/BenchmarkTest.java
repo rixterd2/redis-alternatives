@@ -11,10 +11,14 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.testcontainers.containers.GenericContainer;
 import ru.hh.alternatives.redis.Constants;
-import ru.hh.alternatives.redis.tests.benchmarks.Glide;
-import ru.hh.alternatives.redis.tests.benchmarks.Jedis;
-import ru.hh.alternatives.redis.tests.benchmarks.Lettuce;
-import ru.hh.alternatives.redis.tests.benchmarks.Redisson;
+import ru.hh.alternatives.redis.tests.benchmarks.GlideRead;
+import ru.hh.alternatives.redis.tests.benchmarks.GlideWrite;
+import ru.hh.alternatives.redis.tests.benchmarks.JedisRead;
+import ru.hh.alternatives.redis.tests.benchmarks.JedisWrite;
+import ru.hh.alternatives.redis.tests.benchmarks.LettuceRead;
+import ru.hh.alternatives.redis.tests.benchmarks.LettuceWrite;
+import ru.hh.alternatives.redis.tests.benchmarks.RedissonRead;
+import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 
 public class BenchmarkTest {
   private static final GenericContainer<RedisContainer> redis = new GenericContainer<>("redis:8.0");
@@ -111,7 +115,8 @@ public class BenchmarkTest {
     valkey.start();
     try {
       Options opt = createBuilder()
-          .include(Glide.class.getSimpleName())
+          .include(GlideRead.class.getSimpleName())
+          .include(GlideWrite.class.getSimpleName())
           .result("valkeyInMemoryLRU.json")
           .build();
       new Runner(opt).run();
@@ -130,7 +135,8 @@ public class BenchmarkTest {
     valkey.start();
     try {
       Options opt = createBuilder()
-          .include(Glide.class.getSimpleName())
+          .include(GlideRead.class.getSimpleName())
+          .include(GlideWrite.class.getSimpleName())
           .result("valkeyInMemoryLFU.json")
           .build();
       new Runner(opt).run();
@@ -149,7 +155,8 @@ public class BenchmarkTest {
     valkey.start();
     try {
       Options opt = createBuilder()
-          .include(Glide.class.getSimpleName())
+          .include(GlideRead.class.getSimpleName())
+          .include(GlideWrite.class.getSimpleName())
           .result("valkeyInDiskLRU.json")
           .build();
       new Runner(opt).run();
@@ -168,7 +175,8 @@ public class BenchmarkTest {
     valkey.start();
     try {
       Options opt = createBuilder()
-          .include(Glide.class.getSimpleName())
+          .include(GlideRead.class.getSimpleName())
+          .include(GlideWrite.class.getSimpleName())
           .result("valkeyInDiskLFU.json")
           .build();
       new Runner(opt).run();
@@ -179,11 +187,14 @@ public class BenchmarkTest {
     }
   }
 
-  private ChainedOptionsBuilder createBuilder() {
+  private static ChainedOptionsBuilder createBuilder() {
     return new OptionsBuilder()
-        .include(Jedis.class.getSimpleName())
-        .include(Lettuce.class.getSimpleName())
-        .include(Redisson.class.getSimpleName())
+        .include(JedisRead.class.getSimpleName())
+        .include(LettuceRead.class.getSimpleName())
+        .include(RedissonRead.class.getSimpleName())
+        .include(JedisWrite.class.getSimpleName())
+        .include(LettuceWrite.class.getSimpleName())
+        .include(RedissonWrite.class.getSimpleName())
         .warmupIterations(5)
         .measurementIterations(10)
         .resultFormat(ResultFormatType.JSON)

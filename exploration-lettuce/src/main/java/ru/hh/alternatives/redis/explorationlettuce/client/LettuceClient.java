@@ -11,7 +11,6 @@ public class LettuceClient implements KeyValueClient<String, String> {
   private final RedisClient client;
   private final StatefulRedisConnection<String, String> connection;
   private final RedisCommands<String, String> commands;
-  private final String[] keyHolder = new String[1];
 
   public LettuceClient(String host, int port) {
     client = RedisClient.create(new RedisURI(host, port, Duration.ofSeconds(1)));
@@ -30,9 +29,13 @@ public class LettuceClient implements KeyValueClient<String, String> {
   }
 
   @Override
+  public void setAndExpire(String key, String value, long seconds) {
+    commands.setex(key, seconds, value);
+  }
+
+  @Override
   public void delete(String key) {
-    keyHolder[0] = key;
-    commands.del(keyHolder);
+    commands.del(key);
   }
 
   @Override

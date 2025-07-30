@@ -5,6 +5,8 @@ public interface KeyValueClient<K,V>{
 
   void set(K key, V value);
 
+  void setAndExpire(K key, V value, long seconds);
+
   void delete(K key);
 
   void close();

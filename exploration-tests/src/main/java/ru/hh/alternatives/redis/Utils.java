@@ -47,9 +47,5 @@ public class Utils {
     for (String key : Constants.KEYS_1MB.keySet()) {
       client.delete(key);
     }
-
-    for (String key : Constants.KEYS_TO_REMOVE.keySet()) {
-      client.delete(key);
-    }
   }
 }

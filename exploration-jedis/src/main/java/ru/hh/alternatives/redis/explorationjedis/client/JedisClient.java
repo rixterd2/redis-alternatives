@@ -24,6 +24,11 @@ public class JedisClient implements KeyValueClient<String, String> {
   }
 
   @Override
+  public void setAndExpire(String key, String value, long seconds) {
+    resource.setex(key, seconds, value);
+  }
+
+  @Override
   public void delete(String key) {
     resource.del(key);
   }

@@ -8,56 +8,47 @@ import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.TearDown;
 import ru.hh.alternatives.redis.Constants;
 import ru.hh.alternatives.redis.Utils;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
-import ru.hh.alternatives.redis.explorationjedis.client.JedisClient;
+import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Thread)
-public class Jedis {
-  private static final KeyValueClient<String, String> jedis = new JedisClient(Constants.HOST, Constants.PORT);
-
-  @Setup(Level.Iteration)
-  public void setupIter() {
-    Utils.setupKeys(jedis);
-  }
-
-  @TearDown(Level.Iteration)
-  public void tearDownIter() {
-    Utils.cleanupKeys(jedis);
-  }
+public class LettuceWrite {
+  private static final KeyValueClient<String, String> lettuce = new LettuceClient(Constants.HOST, Constants.PORT);
 
   @TearDown(Level.Trial)
   public static void tearDown() {
-    jedis.close();
+    lettuce.close();
   }
 
   @Benchmark
-  public void get() {
-    jedis.get(Utils.randomKey(Constants.KEYS));
-  }
-
-  @Benchmark
-  public void get1Mb() {
-    jedis.get(Utils.randomKey(Constants.KEYS_1MB));
-  }
-
-  @Benchmark
-  public void set() {
+  public void setAndExpire() {
     String key = UUID.randomUUID().toString();
-    jedis.set(key, UUID.randomUUID().toString());
-    Constants.KEYS_TO_REMOVE.put(key, key);
+    lettuce.setAndExpire(key, UUID.randomUUID().toString(), 10);
   }
 
   @Benchmark
-  public void set1Mb() {
+  public void set1MbAndExpire() {
     String key = UUID.randomUUID().toString();
-    jedis.set(key, Utils.randomString1Mb());
-    Constants.KEYS_TO_REMOVE.put(key, key);
+    lettuce.setAndExpire(key, Utils.randomString1Mb(), 10);
+  }
+
+  @Benchmark
+  public void setAndDelete() {
+    String key = UUID.randomUUID().toString();
+    lettuce.set(key, UUID.randomUUID().toString());
+    lettuce.delete(key);
+  }
+
+  @Benchmark
+  public void set1MbAndDelete() {
+    String key = UUID.randomUUID().toString();
+    lettuce.set(key, Utils.randomString1Mb());
+    lettuce.delete(key);
   }
 }
