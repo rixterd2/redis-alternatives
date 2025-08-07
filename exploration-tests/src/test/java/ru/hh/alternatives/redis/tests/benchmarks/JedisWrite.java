@@ -35,7 +35,7 @@ public class JedisWrite {
   @Benchmark
   public void set1MbAndExpire() {
     String key = UUID.randomUUID().toString();
-    jedis.setAndExpire(key, Utils.randomString1Mb(), 10);
+    jedis.setAndExpire(key, Utils.generateString(Constants.MB_1), 10);
   }
 
   @Benchmark
@@ -48,7 +48,7 @@ public class JedisWrite {
   @Benchmark
   public void set1MbAndDelete() {
     String key = UUID.randomUUID().toString();
-    jedis.set(key, Utils.randomString1Mb());
+    jedis.set(key, Utils.generateString(Constants.MB_1));
     jedis.delete(key);
   }
 }

@@ -20,15 +20,17 @@ import ru.hh.alternatives.redis.tests.benchmarks.LettuceWrite;
 import ru.hh.alternatives.redis.tests.benchmarks.RedissonRead;
 import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 
-public class BenchmarkTest {
+public class MemoryFreeTest {
   private static final GenericContainer<RedisContainer> redis = new GenericContainer<>("redis:8.0");
   private static final GenericContainer<RedisContainer> valkey = new GenericContainer<>("valkey/valkey:8.0");
 
+  private static final long CACHE_SIZE_MB = 256;
+
   // See redis.conf and valkey.conf configuration documentation
-  private static final String CONFIG_IN_DISK_LRU = "--maxmemory 256m --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes";
-  private static final String CONFIG_IN_DISK_LFU = "--maxmemory 256m --maxmemory-policy allkeys-lfu --save 60 1000 --appendonly yes";
-  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory 256m --maxmemory-policy allkeys-lru --save '' --appendonly no";
-  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory 256m --maxmemory-policy allkeys-lfu --save '' --appendonly no";
+  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %sm --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes".formatted(CACHE_SIZE_MB);
+  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %sm --maxmemory-policy allkeys-lfu --save 60 1000 --appendonly yes".formatted(CACHE_SIZE_MB);
+  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %sm --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(CACHE_SIZE_MB);
+  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %sm --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(CACHE_SIZE_MB);
 
   static {
     redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
@@ -37,7 +39,6 @@ public class BenchmarkTest {
 
   @Test
   public void redisInMemoryLRU() throws RunnerException {
-    System.out.println("Starting redisInMemoryLRU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LRU));
 
     redis.start();
@@ -55,7 +56,6 @@ public class BenchmarkTest {
 
   @Test
   public void redisInMemoryLFU() throws RunnerException {
-    System.out.println("Starting redisInMemoryLFU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LFU));
 
     redis.start();
@@ -73,7 +73,6 @@ public class BenchmarkTest {
 
   @Test
   public void redisInDiskLRU() throws RunnerException {
-    System.out.println("Starting redisInDiskLRU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LRU));
 
     redis.start();
@@ -91,7 +90,6 @@ public class BenchmarkTest {
 
   @Test
   public void redisInDiskLFU() throws RunnerException {
-    System.out.println("Starting redisInDiskLFU");
     redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LFU));
 
     redis.start();
@@ -109,7 +107,6 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInMemoryLRU() throws RunnerException {
-    System.out.println("Starting valkeyInMemoryLRU");
     valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LRU));
 
     valkey.start();
@@ -129,7 +126,6 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInMemoryLFU() throws RunnerException {
-    System.out.println("Starting valkeyInMemoryLFU");
     valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LFU));
 
     valkey.start();
@@ -149,7 +145,6 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInDiskLRU() throws RunnerException {
-    System.out.println("Starting valkeyInDiskLRU");
     valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LRU));
 
     valkey.start();
@@ -169,7 +164,6 @@ public class BenchmarkTest {
 
   @Test
   public void valkeyInDiskLFU() throws RunnerException {
-    System.out.println("Starting valkeyInDiskLFU");
     valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LFU));
 
     valkey.start();

@@ -35,7 +35,7 @@ public class LettuceWrite {
   @Benchmark
   public void set1MbAndExpire() {
     String key = UUID.randomUUID().toString();
-    lettuce.setAndExpire(key, Utils.randomString1Mb(), 10);
+    lettuce.setAndExpire(key, Utils.generateString(Constants.MB_1), 10);
   }
 
   @Benchmark
@@ -48,7 +48,7 @@ public class LettuceWrite {
   @Benchmark
   public void set1MbAndDelete() {
     String key = UUID.randomUUID().toString();
-    lettuce.set(key, Utils.randomString1Mb());
+    lettuce.set(key, Utils.generateString(Constants.MB_1));
     lettuce.delete(key);
   }
 }

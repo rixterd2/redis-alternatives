@@ -1,5 +1,6 @@
 package ru.hh.alternatives.redis.tests.benchmarks;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -20,25 +21,29 @@ import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
 @State(Scope.Thread)
 public class LettuceRead {
   private static final KeyValueClient<String, String> lettuce = new LettuceClient(Constants.HOST, Constants.PORT);
+  private static final ConcurrentHashMap<String, String> KEYS = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, String> KEYS_1MB = new ConcurrentHashMap<>();
 
   @Setup(Level.Trial)
   public static void setup() {
-    Utils.setupKeys(lettuce);
+    KEYS.putAll(Utils.generateKeys(lettuce, 16, Constants.KB_1));
+    KEYS_1MB.putAll(Utils.generateKeys(lettuce, 16, Constants.MB_1));
   }
 
   @TearDown(Level.Trial)
   public static void tearDown() {
-    Utils.cleanupKeys(lettuce);
+    Utils.cleanup(lettuce, KEYS);
+    Utils.cleanup(lettuce, KEYS_1MB);
     lettuce.close();
   }
 
   @Benchmark
   public void get() {
-    lettuce.get(Utils.randomKey(Constants.KEYS));
+    lettuce.get(Utils.randomKey(KEYS));
   }
 
   @Benchmark
   public void get1Mb() {
-    lettuce.get(Utils.randomKey(Constants.KEYS_1MB));
+    lettuce.get(Utils.randomKey(KEYS_1MB));
   }
 }

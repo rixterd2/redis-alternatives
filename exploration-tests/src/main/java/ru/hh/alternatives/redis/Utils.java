@@ -1,5 +1,6 @@
 package ru.hh.alternatives.redis;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
@@ -15,9 +16,9 @@ public class Utils {
     return map.keySet().stream().skip(RANDOM.nextInt(size)).findFirst().get();
   }
 
-  public static String randomString1Mb() {
+  public static String generateString(int sizeInBytes) {
     // char is 2 bytes in size so divide into 2
-    int numChars = 1024 * 1024 / 2;
+    int numChars = sizeInBytes / 2;
     StringBuilder sb = new StringBuilder(numChars);
     for (int i = 0; i < numChars; i++) {
       sb.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
@@ -25,26 +26,18 @@ public class Utils {
     return sb.toString();
   }
 
-  public static void setupKeys(KeyValueClient<String, String> client) {
-    for (int i = 0; i < 128; i++) {
+  public static Map<String, String> generateKeys(KeyValueClient<String, String> client, int numberOfKeys, int valueSize) {
+    HashMap<String, String> generatedKeys = new HashMap<>(numberOfKeys);
+    for (int i = 0; i < numberOfKeys; i++) {
       String key = UUID.randomUUID().toString();
-      Constants.KEYS_1MB.put(key, key);
-      client.set(key, Utils.randomString1Mb());
+      generatedKeys.put(key, key);
+      client.set(key, Utils.generateString(valueSize));
     }
-
-    for (int i = 0; i < 128; i++) {
-      String key = UUID.randomUUID().toString();
-      Constants.KEYS.put(key, key);
-      client.set(key, UUID.randomUUID().toString());
-    }
+    return generatedKeys;
   }
 
-  public static void cleanupKeys(KeyValueClient<String, String> client) {
-    for (String key : Constants.KEYS.keySet()) {
-      client.delete(key);
-    }
-
-    for (String key : Constants.KEYS_1MB.keySet()) {
+  public static void cleanup(KeyValueClient<String, String> client, Map<String, String> data) {
+    for (String key : data.keySet()) {
       client.delete(key);
     }
   }

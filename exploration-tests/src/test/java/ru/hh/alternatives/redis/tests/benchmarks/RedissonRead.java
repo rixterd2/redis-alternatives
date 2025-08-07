@@ -1,5 +1,6 @@
 package ru.hh.alternatives.redis.tests.benchmarks;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -20,25 +21,29 @@ import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonCl
 @State(Scope.Thread)
 public class RedissonRead {
   private static final KeyValueClient<String, String> redisson = new ExplorationRedissonClient(Constants.HOST, Constants.PORT);
+  private static final ConcurrentHashMap<String, String> KEYS = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, String> KEYS_1MB = new ConcurrentHashMap<>();
 
   @Setup(Level.Trial)
   public static void setup() {
-    Utils.setupKeys(redisson);
+    KEYS.putAll(Utils.generateKeys(redisson, 16, Constants.KB_1));
+    KEYS_1MB.putAll(Utils.generateKeys(redisson, 16, Constants.MB_1));
   }
 
   @TearDown(Level.Trial)
   public static void tearDown() {
-    Utils.cleanupKeys(redisson);
+    Utils.cleanup(redisson, KEYS);
+    Utils.cleanup(redisson, KEYS_1MB);
     redisson.close();
   }
 
   @Benchmark
   public void get() {
-    redisson.get(Utils.randomKey(Constants.KEYS));
+    redisson.get(Utils.randomKey(KEYS));
   }
 
   @Benchmark
   public void get1Mb() {
-    redisson.get(Utils.randomKey(Constants.KEYS_1MB));
+    redisson.get(Utils.randomKey(KEYS_1MB));
   }
 }

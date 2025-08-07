@@ -1,5 +1,6 @@
 package ru.hh.alternatives.redis.tests.benchmarks;
 
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -20,25 +21,29 @@ import ru.hh.alternatives.redis.explorationjedis.client.ExplorationGlideClient;
 @State(Scope.Thread)
 public class GlideRead {
   private static final KeyValueClient<String, String> glide = new ExplorationGlideClient(Constants.HOST, Constants.PORT);
+  private static final ConcurrentHashMap<String, String> KEYS = new ConcurrentHashMap<>();
+  private static final ConcurrentHashMap<String, String> KEYS_1MB = new ConcurrentHashMap<>();
 
   @Setup(Level.Trial)
   public static void setup() {
-    Utils.setupKeys(glide);
+    KEYS.putAll(Utils.generateKeys(glide, 16, Constants.KB_1)); // 1kb
+    KEYS_1MB.putAll(Utils.generateKeys(glide, 16, Constants.MB_1)); // 1mb
   }
 
   @TearDown(Level.Trial)
   public static void tearDown() {
-    Utils.cleanupKeys(glide);
+    Utils.cleanup(glide, KEYS);
+    Utils.cleanup(glide, KEYS_1MB);
     glide.close();
   }
 
   @Benchmark
   public void get() {
-    glide.get(Utils.randomKey(Constants.KEYS));
+    glide.get(Utils.randomKey(KEYS));
   }
 
   @Benchmark
   public void get1Mb() {
-    glide.get(Utils.randomKey(Constants.KEYS_1MB));
+    glide.get(Utils.randomKey(KEYS_1MB));
   }
 }
