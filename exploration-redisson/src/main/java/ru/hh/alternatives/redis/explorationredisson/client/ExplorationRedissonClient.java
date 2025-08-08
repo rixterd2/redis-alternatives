@@ -13,6 +13,10 @@ public class ExplorationRedissonClient implements KeyValueClient<String, String>
 
   public ExplorationRedissonClient(String host, int port) {
     Config config = new Config();
+    // processing threads
+    config.setThreads(Runtime.getRuntime().availableProcessors());
+    // io threads
+    config.setNettyThreads(Runtime.getRuntime().availableProcessors() * 4);
     config.useSingleServer().setAddress("valkey://%s:%d".formatted(host, port));
     client = Redisson.create(config);
   }

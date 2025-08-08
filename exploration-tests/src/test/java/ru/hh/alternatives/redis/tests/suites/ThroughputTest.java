@@ -47,7 +47,7 @@ public class ThroughputTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInMemoryLRU.json")
+          .result("redisInMemoryLRU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -64,7 +64,7 @@ public class ThroughputTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInMemoryLFU.json")
+          .result("redisInMemoryLFU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -81,7 +81,7 @@ public class ThroughputTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInDiskLRU.json")
+          .result("redisInDiskLRU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -98,7 +98,7 @@ public class ThroughputTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInDiskLFU.json")
+          .result("redisInDiskLFU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -117,7 +117,7 @@ public class ThroughputTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInMemoryLRU.json")
+          .result("valkeyInMemoryLRU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -136,7 +136,7 @@ public class ThroughputTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInMemoryLFU.json")
+          .result("valkeyInMemoryLFU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -155,7 +155,7 @@ public class ThroughputTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInDiskLRU.json")
+          .result("valkeyInDiskLRU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -174,7 +174,7 @@ public class ThroughputTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInDiskLFU.json")
+          .result("valkeyInDiskLFU-throughput.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -195,6 +195,7 @@ public class ThroughputTest {
         .warmupIterations(0)
         .measurementIterations(1)
         .measurementTime(TimeValue.seconds(60L))
+        .threads(Runtime.getRuntime().availableProcessors())
         .resultFormat(ResultFormatType.JSON)
         .mode(Mode.Throughput)
         .forks(1);

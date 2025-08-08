@@ -49,7 +49,7 @@ public class MemoryPressureTest {
     setupMemoryPressure();
     try {
       Options opt = createBuilder()
-          .result("redisInMemoryLRU.json")
+          .result("redisInMemoryLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -67,7 +67,7 @@ public class MemoryPressureTest {
     setupMemoryPressure();
     try {
       Options opt = createBuilder()
-          .result("redisInMemoryLFU.json")
+          .result("redisInMemoryLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -85,7 +85,7 @@ public class MemoryPressureTest {
     setupMemoryPressure();
     try {
       Options opt = createBuilder()
-          .result("redisInDiskLRU.json")
+          .result("redisInDiskLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -103,7 +103,7 @@ public class MemoryPressureTest {
     setupMemoryPressure();
     try {
       Options opt = createBuilder()
-          .result("redisInDiskLFU.json")
+          .result("redisInDiskLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -123,7 +123,7 @@ public class MemoryPressureTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInMemoryLRU.json")
+          .result("valkeyInMemoryLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -143,7 +143,7 @@ public class MemoryPressureTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInMemoryLFU.json")
+          .result("valkeyInMemoryLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -163,7 +163,7 @@ public class MemoryPressureTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInDiskLRU.json")
+          .result("valkeyInDiskLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -183,7 +183,7 @@ public class MemoryPressureTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInDiskLFU.json")
+          .result("valkeyInDiskLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
     } finally {

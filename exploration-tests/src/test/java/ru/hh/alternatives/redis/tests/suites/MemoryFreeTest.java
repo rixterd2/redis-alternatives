@@ -44,7 +44,7 @@ public class MemoryFreeTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInMemoryLRU.json")
+          .result("redisInMemoryLRU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -61,7 +61,7 @@ public class MemoryFreeTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInMemoryLFU.json")
+          .result("redisInMemoryLFU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -78,7 +78,7 @@ public class MemoryFreeTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInDiskLRU.json")
+          .result("redisInDiskLRU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -95,7 +95,7 @@ public class MemoryFreeTest {
     redis.start();
     try {
       Options opt = createBuilder()
-          .result("redisInDiskLFU.json")
+          .result("redisInDiskLFU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -114,7 +114,7 @@ public class MemoryFreeTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInMemoryLRU.json")
+          .result("valkeyInMemoryLRU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -133,7 +133,7 @@ public class MemoryFreeTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInMemoryLFU.json")
+          .result("valkeyInMemoryLFU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -152,7 +152,7 @@ public class MemoryFreeTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInDiskLRU.json")
+          .result("valkeyInDiskLRU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
@@ -171,7 +171,7 @@ public class MemoryFreeTest {
       Options opt = createBuilder()
           .include(GlideRead.class.getSimpleName())
           .include(GlideWrite.class.getSimpleName())
-          .result("valkeyInDiskLFU.json")
+          .result("valkeyInDiskLFU-memory-free.json")
           .build();
       new Runner(opt).run();
     } finally {
