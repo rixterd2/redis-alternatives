@@ -1,9 +1,12 @@
 package ru.hh.alternatives.redis.tests.suites;
 
 import com.redis.testcontainers.RedisContainer;
+import java.lang.reflect.Method;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.annotations.Setup;
+import org.openjdk.jmh.annotations.TearDown;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -38,6 +41,52 @@ public class ThroughputTest {
   static {
     redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
     valkey.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
+  }
+
+  @Test
+  public void jfr() throws RunnerException {
+    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LRU));
+
+    List<Class<?>> classes = List.of(
+        GlideRead.class,
+        GlideWrite.class,
+        JedisRead.class,
+        JedisWrite.class,
+        LettuceRead.class,
+        LettuceWrite.class,
+        RedissonRead.class,
+        RedissonWrite.class
+    );
+
+    valkey.start();
+    try {
+      for (Class<?> clazz : classes) {
+        Method[] methods = clazz.getDeclaredMethods();
+        for (Method method : methods) {
+          TearDown teardown = method.getAnnotation(TearDown.class);
+          Setup setup = method.getAnnotation(Setup.class);
+          if (teardown != null || setup != null) {
+            continue;
+          }
+          String regexp = clazz.getSimpleName() + "." + method.getName();
+          System.out.println(regexp);
+          Options opt = new OptionsBuilder()
+              .jvmArgs("-XX:StartFlightRecording=filename=%s.jfr,duration=60s".formatted(regexp))
+              .include(regexp + "$")
+              .warmupIterations(0)
+              .measurementIterations(1)
+              .measurementTime(TimeValue.seconds(60))
+              .resultFormat(ResultFormatType.JSON)
+              .forks(1)
+              .build();
+          new Runner(opt).run();
+        }
+      }
+    } finally {
+      if (valkey.isRunning()) {
+        valkey.stop();
+      }
+    }
   }
 
   @Test
