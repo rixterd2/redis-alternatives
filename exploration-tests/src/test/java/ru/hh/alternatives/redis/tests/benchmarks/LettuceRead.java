@@ -18,7 +18,7 @@ import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Thread)
+@State(Scope.Benchmark)
 public class LettuceRead {
   private static final KeyValueClient<String, String> lettuce = new LettuceClient(Constants.HOST, Constants.PORT);
   private static final ConcurrentHashMap<String, String> KEYS = new ConcurrentHashMap<>();

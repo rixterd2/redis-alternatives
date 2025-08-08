@@ -17,7 +17,7 @@ import ru.hh.alternatives.redis.explorationlettuce.client.LettuceClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Thread)
+@State(Scope.Benchmark)
 public class LettuceWrite {
   private static final KeyValueClient<String, String> lettuce = new LettuceClient(Constants.HOST, Constants.PORT);
 

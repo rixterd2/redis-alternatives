@@ -17,7 +17,7 @@ import ru.hh.alternatives.redis.explorationjedis.client.ExplorationGlideClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Thread)
+@State(Scope.Benchmark)
 public class GlideWrite {
   private static final KeyValueClient<String, String> glide = new ExplorationGlideClient(Constants.HOST, Constants.PORT);
 

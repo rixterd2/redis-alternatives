@@ -17,7 +17,7 @@ import ru.hh.alternatives.redis.explorationjedis.client.JedisClient;
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Thread)
+@State(Scope.Benchmark)
 public class JedisWrite {
   private static final KeyValueClient<String, String> jedis = new JedisClient(Constants.HOST, Constants.PORT);
 

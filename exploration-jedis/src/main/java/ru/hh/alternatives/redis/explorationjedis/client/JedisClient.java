@@ -11,6 +11,8 @@ public class JedisClient implements KeyValueClient<String, String> {
   public JedisClient(String host, int port) {
     GenericObjectPoolConfig<Jedis> config = new GenericObjectPoolConfig<>();
     config.setMaxTotal(Runtime.getRuntime().availableProcessors() * 4);
+    config.setTestOnBorrow(true);
+    config.setTestOnReturn(true);
     jedisPool = new JedisPool(config, host, port);
   }
 

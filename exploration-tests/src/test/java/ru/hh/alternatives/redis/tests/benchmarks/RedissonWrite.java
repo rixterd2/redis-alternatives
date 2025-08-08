@@ -17,7 +17,7 @@ import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonCl
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Thread)
+@State(Scope.Benchmark)
 public class RedissonWrite {
   private static final KeyValueClient<String, String> redisson = new ExplorationRedissonClient(Constants.HOST, Constants.PORT);
 

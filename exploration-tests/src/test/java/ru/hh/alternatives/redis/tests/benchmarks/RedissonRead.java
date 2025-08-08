@@ -18,7 +18,7 @@ import ru.hh.alternatives.redis.explorationredisson.client.ExplorationRedissonCl
 
 @BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
-@State(Scope.Thread)
+@State(Scope.Benchmark)
 public class RedissonRead {
   private static final KeyValueClient<String, String> redisson = new ExplorationRedissonClient(Constants.HOST, Constants.PORT);
   private static final ConcurrentHashMap<String, String> KEYS = new ConcurrentHashMap<>();
