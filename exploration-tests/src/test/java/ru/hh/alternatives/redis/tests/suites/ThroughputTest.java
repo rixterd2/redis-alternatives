@@ -30,13 +30,15 @@ public class ThroughputTest {
   private static final GenericContainer<RedisContainer> valkey = new GenericContainer<>("valkey/valkey:8.0");
 
   private static final long CACHE_SIZE_MB = 10240;
+  // see redis.conf documentation
+  private static final int IO_THREADS = Runtime.getRuntime().availableProcessors() - 1;
 
   // See redis.conf and valkey.conf configuration documentation
   // Enable disk but disable any writes, just to check difference (we are not able to run one behcmark for hour or go beyond 1 billion keys)
-  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %sm --maxmemory-policy allkeys-lru --save 3600 1000000000 --appendonly yes".formatted(CACHE_SIZE_MB);
-  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %sm --maxmemory-policy allkeys-lfu --save 3600 1000000000 --appendonly yes".formatted(CACHE_SIZE_MB);
-  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %sm --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(CACHE_SIZE_MB);
-  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %sm --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(CACHE_SIZE_MB);
+  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lru --save 3600 1000000000 --appendonly yes".formatted(CACHE_SIZE_MB, IO_THREADS);
+  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lfu --save 3600 1000000000 --appendonly yes".formatted(CACHE_SIZE_MB, IO_THREADS);
+  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(CACHE_SIZE_MB, IO_THREADS);
+  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(CACHE_SIZE_MB, IO_THREADS);
 
   static {
     redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
