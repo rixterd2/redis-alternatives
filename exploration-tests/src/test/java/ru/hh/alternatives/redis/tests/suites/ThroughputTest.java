@@ -3,6 +3,7 @@ package ru.hh.alternatives.redis.tests.suites;
 import com.redis.testcontainers.RedisContainer;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Setup;
@@ -294,6 +295,7 @@ public class ThroughputTest {
         .resultFormat(ResultFormatType.JSON)
         .threads(Runtime.getRuntime().availableProcessors())
         .mode(Mode.Throughput)
+        .timeUnit(TimeUnit.SECONDS)
         .forks(1);
 
     for (String benchmark : benchmarks) {
