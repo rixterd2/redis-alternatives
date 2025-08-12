@@ -2,6 +2,7 @@ package ru.hh.alternatives.redis.tests.suites;
 
 import com.redis.testcontainers.RedisContainer;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
@@ -221,11 +222,12 @@ public class MemoryFreeTest {
 
   private static ChainedOptionsBuilder createBuilder(List<String> benchmarks) {
     ChainedOptionsBuilder builder = new OptionsBuilder()
-        .warmupIterations(10)
-        .warmupTime(TimeValue.seconds(1))
+        .warmupIterations(3)
+        .warmupTime(TimeValue.seconds(5L))
         .measurementIterations(10)
-        .measurementTime(TimeValue.seconds(1))
+        .measurementTime(TimeValue.seconds(5L))
         .resultFormat(ResultFormatType.JSON)
+        .timeUnit(TimeUnit.NANOSECONDS)
         .jvmArgsAppend("-XX:+UnlockExperimentalVMOptions")
         .jvmArgsAppend("-XX:+UseEpsilonGC")
         .jvmArgsAppend("-Xmx10g")

@@ -289,9 +289,10 @@ public class ThroughputTest {
 
   private static ChainedOptionsBuilder createBuilder(List<String> benchmarks) {
     ChainedOptionsBuilder builder = new OptionsBuilder()
-        .warmupIterations(0)
-        .measurementIterations(1)
-        .measurementTime(TimeValue.seconds(60L))
+        .warmupIterations(1)
+        .warmupTime(TimeValue.seconds(10L))
+        .measurementIterations(10)
+        .measurementTime(TimeValue.seconds(20L))
         .resultFormat(ResultFormatType.JSON)
         .threads(Runtime.getRuntime().availableProcessors())
         .mode(Mode.Throughput)
