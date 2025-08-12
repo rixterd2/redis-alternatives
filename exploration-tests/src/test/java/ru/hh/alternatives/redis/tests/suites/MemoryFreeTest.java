@@ -226,6 +226,11 @@ public class MemoryFreeTest {
         .measurementIterations(10)
         .measurementTime(TimeValue.seconds(1))
         .resultFormat(ResultFormatType.JSON)
+        .jvmArgsAppend("-XX:+UnlockExperimentalVMOptions")
+        .jvmArgsAppend("-XX:+UseEpsilonGC")
+        .jvmArgsAppend("-Xmx10g")
+        .jvmArgsAppend("-Xms10g")
+        .jvmArgsAppend("-XX:+AlwaysPreTouch")
         .forks(1);
 
     for (String benchmark : benchmarks) {
