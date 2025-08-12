@@ -29,26 +29,26 @@ public class GlideWrite {
   @Benchmark
   public void setAndExpire() {
     String key = UUID.randomUUID().toString();
-    glide.setAndExpire(key, UUID.randomUUID().toString(), 10);
+    glide.setAndExpire(key, Constants.VALUE_1KB, 10);
   }
 
   @Benchmark
   public void set1MbAndExpire() {
     String key = UUID.randomUUID().toString();
-    glide.setAndExpire(key, Utils.generateString(Constants.MB_1), 10);
+    glide.setAndExpire(key, Constants.VALUE_1MB, 10);
   }
 
   @Benchmark
   public void setAndDelete() {
     String key = UUID.randomUUID().toString();
-    glide.set(key, UUID.randomUUID().toString());
+    glide.set(key, Constants.VALUE_1KB);
     glide.delete(key);
   }
 
   @Benchmark
   public void set1MbAndDelete() {
     String key = UUID.randomUUID().toString();
-    glide.set(key, Utils.generateString(Constants.MB_1));
+    glide.set(key, Constants.VALUE_1MB);
     glide.delete(key);
   }
 }

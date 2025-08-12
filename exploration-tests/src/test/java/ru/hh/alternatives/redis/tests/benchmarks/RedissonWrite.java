@@ -29,26 +29,26 @@ public class RedissonWrite {
   @Benchmark
   public void setAndExpire() {
     String key = UUID.randomUUID().toString();
-    redisson.setAndExpire(key, UUID.randomUUID().toString(), 10);
+    redisson.setAndExpire(key, Constants.VALUE_1KB, 10);
   }
 
   @Benchmark
   public void set1MbAndExpire() {
     String key = UUID.randomUUID().toString();
-    redisson.setAndExpire(key, Utils.generateString(Constants.MB_1), 10);
+    redisson.setAndExpire(key, Constants.VALUE_1MB, 10);
   }
 
   @Benchmark
   public void setAndDelete() {
     String key = UUID.randomUUID().toString();
-    redisson.set(key, UUID.randomUUID().toString());
+    redisson.set(key, Constants.VALUE_1KB);
     redisson.delete(key);
   }
 
   @Benchmark
   public void set1MbAndDelete() {
     String key = UUID.randomUUID().toString();
-    redisson.set(key, Utils.generateString(Constants.MB_1));
+    redisson.set(key, Constants.VALUE_1MB);
     redisson.delete(key);
   }
 }

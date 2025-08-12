@@ -26,8 +26,8 @@ public class JedisRead {
 
   @Setup(Level.Trial)
   public static void setup() {
-    KEYS.putAll(Utils.generateKeys(jedis, 16, Constants.KB_1)); // 1kb
-    KEYS_1MB.putAll(Utils.generateKeys(jedis, 16, Constants.MB_1)); // 1mb
+    KEYS.putAll(Utils.generateKeys1kb(jedis, 16));
+    KEYS_1MB.putAll(Utils.generateKeys1mb(jedis, 16));
   }
 
   @TearDown(Level.Trial)

@@ -10,6 +10,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 import org.testcontainers.containers.GenericContainer;
 import ru.hh.alternatives.redis.Constants;
 import ru.hh.alternatives.redis.Utils;
@@ -27,18 +28,46 @@ import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 public class MemoryPressureTest {
   private static final GenericContainer<RedisContainer> redis = new GenericContainer<>("redis:8.0");
   private static final GenericContainer<RedisContainer> valkey = new GenericContainer<>("valkey/valkey:8.0");
+  private static final GenericContainer<RedisContainer> dragonflydb = new GenericContainer<>("docker.dragonflydb.io/dragonflydb/dragonfly:latest");
 
-  private static final long CACHE_SIZE_MB = 256;
+  private static final long CACHE_SIZE_GB = 2;
+
+  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %sg".formatted(CACHE_SIZE_GB);
 
   // See redis.conf and valkey.conf configuration documentation
-  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %sm --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes".formatted(CACHE_SIZE_MB);
-  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %sm --maxmemory-policy allkeys-lfu --save 60 1000 --appendonly yes".formatted(CACHE_SIZE_MB);
-  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %sm --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(CACHE_SIZE_MB);
-  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %sm --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(CACHE_SIZE_MB);
+  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %sg --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes".formatted(
+      CACHE_SIZE_GB);
+  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %sg --maxmemory-policy allkeys-lfu --save 60 1000 --appendonly yes".formatted(
+      CACHE_SIZE_GB);
+  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %sg --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(
+      CACHE_SIZE_GB);
+  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %sg --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
+      CACHE_SIZE_GB);
+
+  private static final List<String> REDIS_BENCHMARKS = List.of(
+      JedisRead.class.getSimpleName(),
+      LettuceRead.class.getSimpleName(),
+      RedissonRead.class.getSimpleName(),
+      JedisWrite.class.getSimpleName(),
+      LettuceWrite.class.getSimpleName(),
+      RedissonWrite.class.getSimpleName()
+  );
+
+  private static final List<String> VALKEY_BENCHMARKS = List.of(
+      GlideRead.class.getSimpleName(),
+      JedisRead.class.getSimpleName(),
+      LettuceRead.class.getSimpleName(),
+      RedissonRead.class.getSimpleName(),
+      GlideWrite.class.getSimpleName(),
+      JedisWrite.class.getSimpleName(),
+      LettuceWrite.class.getSimpleName(),
+      RedissonWrite.class.getSimpleName()
+  );
 
   static {
     redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
     valkey.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
+    dragonflydb.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
   }
 
   @Test
@@ -48,7 +77,7 @@ public class MemoryPressureTest {
     redis.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInMemoryLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -66,7 +95,7 @@ public class MemoryPressureTest {
     redis.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInMemoryLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -84,7 +113,7 @@ public class MemoryPressureTest {
     redis.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInDiskLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -102,7 +131,7 @@ public class MemoryPressureTest {
     redis.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInDiskLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -120,9 +149,7 @@ public class MemoryPressureTest {
     valkey.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInMemoryLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -140,9 +167,7 @@ public class MemoryPressureTest {
     valkey.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInMemoryLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -160,9 +185,7 @@ public class MemoryPressureTest {
     valkey.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInDiskLRU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -180,9 +203,7 @@ public class MemoryPressureTest {
     valkey.start();
     setupMemoryPressure();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInDiskLFU-memory-pressure.json")
           .build();
       new Runner(opt).run();
@@ -193,24 +214,45 @@ public class MemoryPressureTest {
     }
   }
 
-  private static ChainedOptionsBuilder createBuilder() {
-    return new OptionsBuilder()
-        .include(JedisRead.class.getSimpleName())
-        .include(LettuceRead.class.getSimpleName())
-        .include(RedissonRead.class.getSimpleName())
-        .include(JedisWrite.class.getSimpleName())
-        .include(LettuceWrite.class.getSimpleName())
-        .include(RedissonWrite.class.getSimpleName())
-        .warmupIterations(5)
+  @Test
+  public void dragonflydb() throws RunnerException {
+    dragonflydb.setCommand("dragonfly %s".formatted(DRAGONFLYDB_CONFIG));
+
+    dragonflydb.start();
+    try {
+      Options opt = createBuilder(REDIS_BENCHMARKS)
+          .result("dragonflydb-memory-pressure.json")
+          .build();
+      new Runner(opt).run();
+    } finally {
+      if (dragonflydb.isRunning()) {
+        dragonflydb.stop();
+      }
+    }
+  }
+
+  private static ChainedOptionsBuilder createBuilder(List<String> benchmarks) {
+    ChainedOptionsBuilder builder = new OptionsBuilder()
+        .warmupIterations(10)
+        .warmupTime(TimeValue.seconds(1))
         .measurementIterations(10)
+        .measurementTime(TimeValue.seconds(1))
         .resultFormat(ResultFormatType.JSON)
         .forks(1);
+
+    for (String benchmark : benchmarks) {
+      builder.include(benchmark);
+    }
+
+    return builder;
   }
 
   public void setupMemoryPressure() {
     KeyValueClient<String, String> jedis = new JedisClient(Constants.HOST, Constants.PORT);
-    for (int i = 0; i < CACHE_SIZE_MB; i++) {
-      jedis.set(UUID.randomUUID().toString(), Utils.generateString(Constants.MB_1));
+    // 2 just in case to fill up the memory
+    long keyCount = CACHE_SIZE_GB * 1024 * 2;
+    for (int i = 0; i < keyCount; i++) {
+      jedis.set(UUID.randomUUID().toString(), Constants.VALUE_1MB);
     }
     jedis.close();
   }

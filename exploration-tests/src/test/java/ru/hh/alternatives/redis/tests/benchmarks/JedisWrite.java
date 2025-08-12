@@ -29,26 +29,26 @@ public class JedisWrite {
   @Benchmark
   public void setAndExpire() {
     String key = UUID.randomUUID().toString();
-    jedis.setAndExpire(key, UUID.randomUUID().toString(), 10);
+    jedis.setAndExpire(key, Constants.VALUE_1KB, 10);
   }
 
   @Benchmark
   public void set1MbAndExpire() {
     String key = UUID.randomUUID().toString();
-    jedis.setAndExpire(key, Utils.generateString(Constants.MB_1), 10);
+    jedis.setAndExpire(key, Constants.VALUE_1MB, 10);
   }
 
   @Benchmark
   public void setAndDelete() {
     String key = UUID.randomUUID().toString();
-    jedis.set(key, UUID.randomUUID().toString());
+    jedis.set(key, Constants.VALUE_1KB);
     jedis.delete(key);
   }
 
   @Benchmark
   public void set1MbAndDelete() {
     String key = UUID.randomUUID().toString();
-    jedis.set(key, Utils.generateString(Constants.MB_1));
+    jedis.set(key, Constants.VALUE_1MB);
     jedis.delete(key);
   }
 }

@@ -26,8 +26,8 @@ public class RedissonRead {
 
   @Setup(Level.Trial)
   public static void setup() {
-    KEYS.putAll(Utils.generateKeys(redisson, 16, Constants.KB_1));
-    KEYS_1MB.putAll(Utils.generateKeys(redisson, 16, Constants.MB_1));
+    KEYS.putAll(Utils.generateKeys1kb(redisson, 16));
+    KEYS_1MB.putAll(Utils.generateKeys1mb(redisson, 16));
   }
 
   @TearDown(Level.Trial)

@@ -26,8 +26,8 @@ public class LettuceRead {
 
   @Setup(Level.Trial)
   public static void setup() {
-    KEYS.putAll(Utils.generateKeys(lettuce, 16, Constants.KB_1));
-    KEYS_1MB.putAll(Utils.generateKeys(lettuce, 16, Constants.MB_1));
+    KEYS.putAll(Utils.generateKeys1kb(lettuce, 16));
+    KEYS_1MB.putAll(Utils.generateKeys1mb(lettuce, 16));
   }
 
   @TearDown(Level.Trial)

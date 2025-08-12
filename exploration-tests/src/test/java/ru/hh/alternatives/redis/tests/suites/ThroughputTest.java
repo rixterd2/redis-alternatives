@@ -28,21 +28,64 @@ import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 public class ThroughputTest {
   private static final GenericContainer<RedisContainer> redis = new GenericContainer<>("redis:8.0");
   private static final GenericContainer<RedisContainer> valkey = new GenericContainer<>("valkey/valkey:8.0");
+  private static final GenericContainer<RedisContainer> dragonflydb = new GenericContainer<>("docker.dragonflydb.io/dragonflydb/dragonfly:latest");
 
-  private static final long CACHE_SIZE_MB = 10240;
-  // see redis.conf documentation
+  private static final long CACHE_SIZE_GB = 10;
+  // see redis.conf documentation, main thread is not taken into account thus we have to reduce the value by 1
   private static final int IO_THREADS = Runtime.getRuntime().availableProcessors() - 1;
 
+  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %sg --proactor_threads %d --conn_io_threads %d".formatted(
+      CACHE_SIZE_GB,
+      IO_THREADS + 1,
+      IO_THREADS + 1
+  ); // unlike redis IO is total amount of all threads
   // See redis.conf and valkey.conf configuration documentation
-  // Enable disk but disable any writes, just to check difference (we are not able to run one behcmark for hour or go beyond 1 billion keys)
-  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lru --save 3600 1000000000 --appendonly yes".formatted(CACHE_SIZE_MB, IO_THREADS);
-  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lfu --save 3600 1000000000 --appendonly yes".formatted(CACHE_SIZE_MB, IO_THREADS);
-  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(CACHE_SIZE_MB, IO_THREADS);
-  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %sm --io-threads %d --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(CACHE_SIZE_MB, IO_THREADS);
+  // Enable disk but disable any writes, just to check the difference (we are not able to run one behcmark for hour or go beyond 1 billion keys)
+  private static final String CONFIG_IN_DISK_LRU = ("--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lru --save 3600 1000000000 " +
+      "--appendonly yes").formatted(
+      CACHE_SIZE_GB,
+      IO_THREADS
+  );
+  private static final String CONFIG_IN_DISK_LFU = ("--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lfu --save 3600 1000000000 " +
+      "--appendonly yes").formatted(
+      CACHE_SIZE_GB,
+      IO_THREADS
+  );
+  private static final String CONFIG_IN_MEMORY_LRU =
+      "--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(
+          CACHE_SIZE_GB,
+          IO_THREADS
+      );
+  private static final String CONFIG_IN_MEMORY_LFU =
+      "--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
+          CACHE_SIZE_GB,
+          IO_THREADS
+      );
+
+  private static final List<String> REDIS_BENCHMARKS = List.of(
+      JedisRead.class.getSimpleName(),
+      LettuceRead.class.getSimpleName(),
+      RedissonRead.class.getSimpleName(),
+      JedisWrite.class.getSimpleName(),
+      LettuceWrite.class.getSimpleName(),
+      RedissonWrite.class.getSimpleName()
+  );
+
+  private static final List<String> VALKEY_BENCHMARKS = List.of(
+      GlideRead.class.getSimpleName(),
+      JedisRead.class.getSimpleName(),
+      LettuceRead.class.getSimpleName(),
+      RedissonRead.class.getSimpleName(),
+      GlideWrite.class.getSimpleName(),
+      JedisWrite.class.getSimpleName(),
+      LettuceWrite.class.getSimpleName(),
+      RedissonWrite.class.getSimpleName()
+  );
 
   static {
     redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
     valkey.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
+    dragonflydb.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
   }
 
   @Test
@@ -71,7 +114,6 @@ public class ThroughputTest {
             continue;
           }
           String regexp = clazz.getSimpleName() + "." + method.getName();
-          System.out.println(regexp);
           Options opt = new OptionsBuilder()
               .jvmArgs("-XX:StartFlightRecording=filename=%s.jfr,duration=60s".formatted(regexp))
               .include(regexp + "$")
@@ -97,7 +139,7 @@ public class ThroughputTest {
 
     redis.start();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInMemoryLRU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -114,7 +156,7 @@ public class ThroughputTest {
 
     redis.start();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInMemoryLFU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -131,7 +173,7 @@ public class ThroughputTest {
 
     redis.start();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInDiskLRU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -148,7 +190,7 @@ public class ThroughputTest {
 
     redis.start();
     try {
-      Options opt = createBuilder()
+      Options opt = createBuilder(REDIS_BENCHMARKS)
           .result("redisInDiskLFU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -165,9 +207,7 @@ public class ThroughputTest {
 
     valkey.start();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInMemoryLRU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -184,9 +224,7 @@ public class ThroughputTest {
 
     valkey.start();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInMemoryLFU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -203,9 +241,7 @@ public class ThroughputTest {
 
     valkey.start();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInDiskLRU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -222,9 +258,7 @@ public class ThroughputTest {
 
     valkey.start();
     try {
-      Options opt = createBuilder()
-          .include(GlideRead.class.getSimpleName())
-          .include(GlideWrite.class.getSimpleName())
+      Options opt = createBuilder(VALKEY_BENCHMARKS)
           .result("valkeyInDiskLFU-throughput.json")
           .build();
       new Runner(opt).run();
@@ -235,20 +269,37 @@ public class ThroughputTest {
     }
   }
 
-  private static ChainedOptionsBuilder createBuilder() {
-    return new OptionsBuilder()
-        .include(JedisRead.class.getSimpleName())
-        .include(LettuceRead.class.getSimpleName())
-        .include(RedissonRead.class.getSimpleName())
-        .include(JedisWrite.class.getSimpleName())
-        .include(LettuceWrite.class.getSimpleName())
-        .include(RedissonWrite.class.getSimpleName())
+  @Test
+  public void dragonflydb() throws RunnerException {
+    dragonflydb.setCommand("dragonfly %s".formatted(DRAGONFLYDB_CONFIG));
+
+    dragonflydb.start();
+    try {
+      Options opt = createBuilder(REDIS_BENCHMARKS)
+          .result("dragonflydb-throughput.json")
+          .build();
+      new Runner(opt).run();
+    } finally {
+      if (dragonflydb.isRunning()) {
+        dragonflydb.stop();
+      }
+    }
+  }
+
+  private static ChainedOptionsBuilder createBuilder(List<String> benchmarks) {
+    ChainedOptionsBuilder builder = new OptionsBuilder()
         .warmupIterations(0)
         .measurementIterations(1)
         .measurementTime(TimeValue.seconds(60L))
-        .threads(Runtime.getRuntime().availableProcessors())
         .resultFormat(ResultFormatType.JSON)
+        .threads(Runtime.getRuntime().availableProcessors())
         .mode(Mode.Throughput)
         .forks(1);
+
+    for (String benchmark : benchmarks) {
+      builder.include(benchmark);
+    }
+
+    return builder;
   }
 }

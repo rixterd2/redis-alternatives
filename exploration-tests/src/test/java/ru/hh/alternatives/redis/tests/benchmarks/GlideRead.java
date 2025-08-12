@@ -26,8 +26,8 @@ public class GlideRead {
 
   @Setup(Level.Trial)
   public static void setup() {
-    KEYS.putAll(Utils.generateKeys(glide, 16, Constants.KB_1)); // 1kb
-    KEYS_1MB.putAll(Utils.generateKeys(glide, 16, Constants.MB_1)); // 1mb
+    KEYS.putAll(Utils.generateKeys1kb(glide, 16));
+    KEYS_1MB.putAll(Utils.generateKeys1mb(glide, 16));
   }
 
   @TearDown(Level.Trial)

@@ -26,12 +26,22 @@ public class Utils {
     return sb.toString();
   }
 
-  public static Map<String, String> generateKeys(KeyValueClient<String, String> client, int numberOfKeys, int valueSize) {
+  public static Map<String, String> generateKeys1kb(KeyValueClient<String, String> client, int numberOfKeys) {
     HashMap<String, String> generatedKeys = new HashMap<>(numberOfKeys);
     for (int i = 0; i < numberOfKeys; i++) {
       String key = UUID.randomUUID().toString();
       generatedKeys.put(key, key);
-      client.set(key, Utils.generateString(valueSize));
+      client.set(key, Constants.VALUE_1KB);
+    }
+    return generatedKeys;
+  }
+
+  public static Map<String, String> generateKeys1mb(KeyValueClient<String, String> client, int numberOfKeys) {
+    HashMap<String, String> generatedKeys = new HashMap<>(numberOfKeys);
+    for (int i = 0; i < numberOfKeys; i++) {
+      String key = UUID.randomUUID().toString();
+      generatedKeys.put(key, key);
+      client.set(key, Constants.VALUE_1MB);
     }
     return generatedKeys;
   }
