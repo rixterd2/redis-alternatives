@@ -36,9 +36,9 @@ public class MemoryPressureTest {
   private static final String DRAGONFLYDB_CONFIG = "--maxmemory %dg --proactor_threads %d --conn_io_threads %d".formatted(CACHE_SIZE_GB, 1, 1);
 
   // See redis.conf and valkey.conf configuration documentation
-  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %dg --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes".formatted(
+  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %dg --maxmemory-policy allkeys-lru --save 3600 1000000000 --appendonly yes".formatted(
       CACHE_SIZE_GB);
-  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save 60 1000 --appendonly yes".formatted(
+  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save 3600 1000000000 --appendonly yes".formatted(
       CACHE_SIZE_GB);
   private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %dg --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(
       CACHE_SIZE_GB);
