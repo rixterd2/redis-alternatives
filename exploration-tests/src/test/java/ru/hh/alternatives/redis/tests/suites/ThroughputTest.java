@@ -35,19 +35,21 @@ public class ThroughputTest {
   // see redis.conf documentation, main thread is not taken into account thus we have to reduce the value by 1
   private static final int IO_THREADS = Runtime.getRuntime().availableProcessors() - 1;
 
-  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %sg --proactor_threads %d --conn_io_threads %d".formatted(
+  // by default it uses all available cores ( 8 requires 2gb memory, 16 requires at least 4gb )
+  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %dg --proactor_threads %d --conn_io_threads %d".formatted(
       CACHE_SIZE_GB,
       IO_THREADS + 1,
       IO_THREADS + 1
   ); // unlike redis IO is total amount of all threads
+
   // See redis.conf and valkey.conf configuration documentation
   // Enable disk but disable any writes, just to check the difference (we are not able to run one behcmark for hour or go beyond 1 billion keys)
-  private static final String CONFIG_IN_DISK_LRU = ("--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lru --save 3600 1000000000 " +
+  private static final String CONFIG_IN_DISK_LRU = ("--maxmemory %dg --io-threads %d --maxmemory-policy allkeys-lru --save 3600 1000000000 " +
       "--appendonly yes").formatted(
       CACHE_SIZE_GB,
       IO_THREADS
   );
-  private static final String CONFIG_IN_DISK_LFU = ("--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lfu --save 3600 1000000000 " +
+  private static final String CONFIG_IN_DISK_LFU = ("--maxmemory %dg --io-threads %d --maxmemory-policy allkeys-lfu --save 3600 1000000000 " +
       "--appendonly yes").formatted(
       CACHE_SIZE_GB,
       IO_THREADS

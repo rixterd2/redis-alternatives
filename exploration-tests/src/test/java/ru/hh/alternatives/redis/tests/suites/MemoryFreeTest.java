@@ -29,16 +29,17 @@ public class MemoryFreeTest {
 
   private static final long CACHE_SIZE_GB = 2;
 
-  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %sg".formatted(CACHE_SIZE_GB);
+  // by default it uses all available cores ( 8 requires 2gb memory, 16 requires at least 4gb )
+  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %dg --proactor_threads %d --conn_io_threads %d".formatted(CACHE_SIZE_GB, 1, 1);
 
   // See redis.conf and valkey.conf configuration documentation
-  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %sg --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes".formatted(
+  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %dg --maxmemory-policy allkeys-lru --save 60 1000 --appendonly yes".formatted(
       CACHE_SIZE_GB);
-  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %sg --maxmemory-policy allkeys-lfu --save 60 1000 --appendonly yes".formatted(
+  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save 60 1000 --appendonly yes".formatted(
       CACHE_SIZE_GB);
-  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %sg --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(
+  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %dg --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(
       CACHE_SIZE_GB);
-  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %sg --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
+  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
       CACHE_SIZE_GB);
 
   private static final List<String> REDIS_BENCHMARKS = List.of(
