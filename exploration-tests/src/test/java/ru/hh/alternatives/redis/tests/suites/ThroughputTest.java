@@ -3,8 +3,12 @@ package ru.hh.alternatives.redis.tests.suites;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.TearDown;
@@ -25,39 +29,71 @@ import ru.hh.alternatives.redis.tests.benchmarks.RedissonRead;
 import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 
 public class ThroughputTest extends AbstractBenchmark {
-  private static final long CACHE_SIZE_GB = 10;
+  private static final String CACHE_SIZE = "10g";
   // see redis.conf documentation, main thread is not taken into account thus we have to reduce the value by 1
-  private static final int IO_THREADS = Runtime.getRuntime().availableProcessors() - 1;
+  private static final int IO_THREADS = Runtime.getRuntime().availableProcessors();
 
-  // by default it uses all available cores ( 8 requires 2gb memory, 16 requires at least 4gb )
-  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %dg --proactor_threads %d --conn_io_threads %d".formatted(
-      CACHE_SIZE_GB,
-      IO_THREADS + 1,
-      IO_THREADS + 1
-  ); // unlike redis IO is total amount of all threads
+  private static Stream<Arguments> redisConfigs() {
+    String container = "redis";
+    RedisConfig diskRedisConfig = new RedisConfig().onDisk().withThreads(IO_THREADS);
+    RedisConfig memoryRedisConfig = new RedisConfig().inMemory().withThreads(IO_THREADS);
+    return Stream.of(
+        Arguments.of(
+            "%s-%s-disk-lru".formatted(ThroughputTest.class.getSimpleName(), container),
+            diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
+            diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lru".formatted(ThroughputTest.class.getSimpleName(), container),
+            memoryRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
+            memoryRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        )
+    );
+  }
 
-  // See redis.conf and valkey.conf configuration documentation
-  // Enable disk but disable any writes, just to check the difference (we are not able to run one behcmark for hour or go beyond 1 billion keys)
-  private static final String CONFIG_IN_DISK_LRU = ("--maxmemory %dg --io-threads %d --maxmemory-policy allkeys-lru --save 3600 1000000000 " +
-      "--appendonly yes").formatted(
-      CACHE_SIZE_GB,
-      IO_THREADS
-  );
-  private static final String CONFIG_IN_DISK_LFU = ("--maxmemory %dg --io-threads %d --maxmemory-policy allkeys-lfu --save 3600 1000000000 " +
-      "--appendonly yes").formatted(
-      CACHE_SIZE_GB,
-      IO_THREADS
-  );
-  private static final String CONFIG_IN_MEMORY_LRU =
-      "--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(
-          CACHE_SIZE_GB,
-          IO_THREADS
-      );
-  private static final String CONFIG_IN_MEMORY_LFU =
-      "--maxmemory %sg --io-threads %d --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
-          CACHE_SIZE_GB,
-          IO_THREADS
-      );
+  private static Stream<Arguments> valkeyConfigs() {
+    String container = "valkey";
+    RedisConfig diskRedisConfig = new RedisConfig().onDisk().withThreads(IO_THREADS);
+    RedisConfig memoryRedisConfig = new RedisConfig().inMemory().withThreads(IO_THREADS);
+    return Stream.of(
+        Arguments.of(
+            "%s-%s-disk-lru".formatted(ThroughputTest.class.getSimpleName(), container),
+            diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
+            diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lru".formatted(ThroughputTest.class.getSimpleName(), container),
+            memoryRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
+            memoryRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        )
+    );
+  }
+
+  private static Stream<Arguments> dragonflyConfigs() {
+    DragonflyConfig diskRedisConfig = new DragonflyConfig().onDisk().withThreads(IO_THREADS);
+    return Stream.of(
+        Arguments.of(
+            "%s-dragonfly-disk-eviction".formatted(ThroughputTest.class.getSimpleName()),
+            diskRedisConfig.withMemory(CACHE_SIZE).withEviction()
+        ),
+        Arguments.of(
+            "%s-dragonfly-disk-noeviction".formatted(ThroughputTest.class.getSimpleName()),
+            diskRedisConfig.withMemory(CACHE_SIZE)
+        )
+    );
+  }
 
   @Test
   public void jfr() {
@@ -72,7 +108,13 @@ public class ThroughputTest extends AbstractBenchmark {
         RedissonWrite.class
     );
 
-    this.withValkey(CONFIG_IN_MEMORY_LRU, () -> {
+    RedisConfig config = new RedisConfig()
+        .inMemory()
+        .withThreads(IO_THREADS)
+        .withMemory(CACHE_SIZE)
+        .withEvictionPolicy("allkeys-lru");
+
+    this.withValkey(config.toString(), () -> {
       try {
         for (Class<?> clazz : classes) {
           Method[] methods = clazz.getDeclaredMethods();
@@ -101,13 +143,12 @@ public class ThroughputTest extends AbstractBenchmark {
     });
   }
 
-  @Test
-  public void redisInMemoryLRU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInMemoryLRU-throughput.json")
-        .build();
+  @ParameterizedTest
+  @MethodSource("redisConfigs")
+  public void redis(String name, RedisConfig redisConfig) {
+    Options opt = createBuilder(REDIS_BENCHMARKS).result(name).build();
 
-    this.withRedis(CONFIG_IN_MEMORY_LRU, () -> {
+    this.withRedis(redisConfig.toString(), () -> {
       try {
         new Runner(opt).run();
       } catch (RunnerException e) {
@@ -116,13 +157,12 @@ public class ThroughputTest extends AbstractBenchmark {
     });
   }
 
-  @Test
-  public void redisInMemoryLFU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInMemoryLFU-throughput.json")
-        .build();
+  @ParameterizedTest
+  @MethodSource("valkeyConfigs")
+  public void valkey(String name, RedisConfig redisConfig) {
+    Options opt = createBuilder(VALKEY_BENCHMARKS).result(name).build();
 
-    this.withRedis(CONFIG_IN_MEMORY_LFU, () -> {
+    this.withValkey(redisConfig.toString(), () -> {
       try {
         new Runner(opt).run();
       } catch (RunnerException e) {
@@ -131,103 +171,12 @@ public class ThroughputTest extends AbstractBenchmark {
     });
   }
 
-  @Test
-  public void redisInDiskLRU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInDiskLRU-throughput.json")
-        .build();
+  @ParameterizedTest
+  @MethodSource("dragonflyConfigs")
+  public void dragonfly(String name, DragonflyConfig dragonflyConfig) {
+    Options opt = createBuilder(DRAGONFLY_BENCHMARKS).result(name).build();
 
-    this.withRedis(CONFIG_IN_DISK_LRU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void redisInDiskLFU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInDiskLFU-throughput.json")
-        .build();
-
-    this.withRedis(CONFIG_IN_DISK_LFU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void valkeyInMemoryLRU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInMemoryLRU-throughput.json")
-        .build();
-
-    this.withValkey(CONFIG_IN_MEMORY_LRU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void valkeyInMemoryLFU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInMemoryLFU-throughput.json")
-        .build();
-
-    this.withValkey(CONFIG_IN_MEMORY_LFU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void valkeyInDiskLRU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInDiskLRU-throughput.json")
-        .build();
-
-    this.withValkey(CONFIG_IN_DISK_LRU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void valkeyInDiskLFU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInDiskLFU-throughput.json")
-        .build();
-
-    this.withValkey(CONFIG_IN_DISK_LFU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void dragonflydb() {
-    Options opt = createBuilder(DRAGONFLY_BENCHMARKS)
-        .result("dragonflydb-throughput.json")
-        .build();
-
-    this.withDragonfly(DRAGONFLYDB_CONFIG, () -> {
+    this.withDragonfly(dragonflyConfig.toString(), () -> {
       try {
         new Runner(opt).run();
       } catch (RunnerException e) {

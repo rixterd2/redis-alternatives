@@ -72,4 +72,113 @@ public abstract class AbstractBenchmark {
       }
     }
   }
+
+  public static class RedisConfig {
+    private StringBuilder builder = new StringBuilder();
+
+    public RedisConfig() {
+    }
+
+    private RedisConfig(StringBuilder builder) {
+      this.builder = new StringBuilder(builder);
+    }
+
+    public RedisConfig withMemory(String memory) {
+      builder.append("--maxmemory");
+      builder.append(" ");
+      builder.append(memory);
+      builder.append(" ");
+      return new RedisConfig(builder);
+    }
+
+    public RedisConfig withEvictionPolicy(String policy) {
+      builder.append("--maxmemory-policy");
+      builder.append(" ");
+      builder.append(policy);
+      builder.append(" ");
+      return new RedisConfig(builder);
+    }
+
+    public RedisConfig onDisk() {
+      builder.append("--save 3600 1000000000 --appendonly yes");
+      builder.append(" ");
+      return new RedisConfig(builder);
+    }
+
+    public RedisConfig inMemory() {
+      builder.append("--save '' --appendonly no");
+      builder.append(" ");
+      return new RedisConfig(builder);
+    }
+
+    public RedisConfig withThreads(int threads) {
+      builder.append("--io-threads");
+      builder.append(" ");
+      // main thread is not taken into account
+      builder.append(threads - 1);
+      builder.append(" ");
+      return new RedisConfig(builder);
+    }
+
+    public String build() {
+      return builder.toString();
+    }
+
+    @Override
+    public String toString() {
+      return build();
+    }
+  }
+
+  public static class DragonflyConfig {
+    private StringBuilder builder = new StringBuilder();
+
+    public DragonflyConfig() {
+    }
+
+    private DragonflyConfig(StringBuilder builder) {
+      this.builder = new StringBuilder(builder);
+    }
+
+    public DragonflyConfig withMemory(String memory) {
+      builder.append("--maxmemory");
+      builder.append(" ");
+      builder.append(memory);
+      builder.append(" ");
+      return new DragonflyConfig(builder);
+    }
+
+    public DragonflyConfig withEviction() {
+      builder.append("--cache_mode true");
+      builder.append(" ");
+      return new DragonflyConfig(builder);
+    }
+
+    public DragonflyConfig onDisk() {
+      builder.append("--snapshot_cron ''");
+      builder.append(" ");
+      return new DragonflyConfig(builder);
+    }
+
+    public DragonflyConfig withThreads(int threads) {
+      builder.append("--proactor_threads");
+      builder.append(" ");
+      builder.append(threads);
+      builder.append(" ");
+      builder.append("--conn_io_threads");
+      builder.append(" ");
+      builder.append(threads);
+      builder.append(" ");
+      return new DragonflyConfig(builder);
+    }
+
+    public String build() {
+      return builder.toString();
+    }
+
+    @Override
+    public String toString() {
+      return build();
+    }
+  }
 }

@@ -1,10 +1,12 @@
 package ru.hh.alternatives.redis.tests.suites;
 
-import com.redis.testcontainers.RedisContainer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
@@ -12,170 +14,121 @@ import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.testcontainers.containers.GenericContainer;
-import ru.hh.alternatives.redis.Constants;
-import ru.hh.alternatives.redis.tests.benchmarks.GlideRead;
-import ru.hh.alternatives.redis.tests.benchmarks.GlideWrite;
-import ru.hh.alternatives.redis.tests.benchmarks.JedisRead;
-import ru.hh.alternatives.redis.tests.benchmarks.JedisWrite;
-import ru.hh.alternatives.redis.tests.benchmarks.LettuceRead;
-import ru.hh.alternatives.redis.tests.benchmarks.LettuceWrite;
-import ru.hh.alternatives.redis.tests.benchmarks.RedissonRead;
-import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 
 public class MemoryFreeTest extends AbstractBenchmark {
-  private static final GenericContainer<RedisContainer> redis = new GenericContainer<>("redis:8.0");
-  private static final GenericContainer<RedisContainer> valkey = new GenericContainer<>("valkey/valkey:8.0");
-  private static final GenericContainer<RedisContainer> dragonflydb = new GenericContainer<>("docker.dragonflydb.io/dragonflydb/dragonfly:latest");
-
-  private static final long CACHE_SIZE_GB = 2;
+  private static final String CACHE_SIZE = "2g";
 
   // by default it uses all available cores ( 8 requires 2gb memory, 16 requires at least 4gb )
-  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %dg --proactor_threads %d --conn_io_threads %d".formatted(CACHE_SIZE_GB, 1, 1);
+  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %dg --proactor_threads %d --conn_io_threads %d".formatted(CACHE_SIZE, 1, 1);
 
-  // See redis.conf and valkey.conf configuration documentation
-  private static final String CONFIG_IN_DISK_LRU = "--maxmemory %dg --maxmemory-policy allkeys-lru --save 3600 1000000000 --appendonly yes".formatted(
-      CACHE_SIZE_GB);
-  private static final String CONFIG_IN_DISK_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save 3600 1000000000 --appendonly yes".formatted(
-      CACHE_SIZE_GB);
-  private static final String CONFIG_IN_MEMORY_LRU = "--maxmemory %dg --maxmemory-policy allkeys-lru --save '' --appendonly no".formatted(
-      CACHE_SIZE_GB);
-  private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
-      CACHE_SIZE_GB);
-
-  @Test
-  public void redisInMemoryLRU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInMemoryLRU-memory-free.json")
-        .build();
-
-    this.withRedis(CONFIG_IN_MEMORY_LRU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
+  private static Stream<Arguments> redisConfigs() {
+    String container = "redis";
+    RedisConfig diskRedisConfig = new RedisConfig().onDisk();
+    RedisConfig memoryRedisConfig = new RedisConfig().inMemory();
+    return Stream.of(
+        Arguments.of(
+            "%s-%s-disk-lru".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lfu".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lru".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            memoryRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lfu".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            memoryRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        )
+    );
   }
 
-  @Test
-  public void redisInMemoryLFU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInMemoryLFU-memory-free.json")
-        .build();
-
-    this.withRedis(CONFIG_IN_MEMORY_LFU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
+  private static Stream<Arguments> valkeyConfigs() {
+    String container = "valkey";
+    RedisConfig diskRedisConfig = new RedisConfig().onDisk();
+    RedisConfig memoryRedisConfig = new RedisConfig().inMemory();
+    return Stream.of(
+        Arguments.of(
+            "%s-%s-disk-lru".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lfu".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lru".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            memoryRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lfu".formatted(MemoryFreeTest.class.getSimpleName(), container),
+            memoryRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
+        )
+    );
   }
 
-  @Test
-  public void redisInDiskLRU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInDiskLRU-memory-free.json")
-        .build();
-
-    this.withRedis(CONFIG_IN_DISK_LRU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
+  private static Stream<Arguments> dragonflyConfigs() {
+    DragonflyConfig diskRedisConfig = new DragonflyConfig().onDisk();
+    return Stream.of(
+        Arguments.of(
+            "%s-dragonfly-disk-eviction".formatted(MemoryFreeTest.class.getSimpleName()),
+            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEviction()
+        ),
+        Arguments.of(
+            "%s-dragonfly-disk-noeviction".formatted(MemoryFreeTest.class.getSimpleName()),
+            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE)
+        )
+    );
   }
 
-  @Test
-  public void redisInDiskLFU() {
-    Options opt = createBuilder(REDIS_BENCHMARKS)
-        .result("redisInDiskLFU-memory-free.json")
-        .build();
+  @ParameterizedTest
+  @MethodSource("redisConfigs")
+  public void redis(String name, RedisConfig redisConfig) {
+    Options opt = createBuilder(REDIS_BENCHMARKS).result(name).build();
 
-    this.withRedis(CONFIG_IN_DISK_LFU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
+    this.withRedis(
+        redisConfig.toString(), () -> {
+          try {
+            new Runner(opt).run();
+          } catch (RunnerException e) {
+            Assertions.fail(e.getMessage());
+          }
+        }
+    );
   }
 
-  @Test
-  public void valkeyInMemoryLRU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInMemoryLRU-memory-free.json")
-        .build();
+  @ParameterizedTest
+  @MethodSource("valkeyConfigs")
+  public void valkey(String name, RedisConfig redisConfig) {
+    Options opt = createBuilder(VALKEY_BENCHMARKS).result(name).build();
 
-    this.withValkey(CONFIG_IN_MEMORY_LRU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
+    this.withValkey(
+        redisConfig.toString(), () -> {
+          try {
+            new Runner(opt).run();
+          } catch (RunnerException e) {
+            Assertions.fail(e.getMessage());
+          }
+        }
+    );
   }
 
-  @Test
-  public void valkeyInMemoryLFU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInMemoryLFU-memory-free.json")
-        .build();
+  @ParameterizedTest
+  @MethodSource("dragonflyConfigs")
+  public void dragonfly(String name, RedisConfig redisConfig) {
+    Options opt = createBuilder(DRAGONFLY_BENCHMARKS).result(name).build();
 
-    this.withValkey(CONFIG_IN_MEMORY_LFU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void valkeyInDiskLRU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInDiskLRU-memory-free.json")
-        .build();
-
-    this.withValkey(CONFIG_IN_DISK_LRU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void valkeyInDiskLFU() {
-    Options opt = createBuilder(VALKEY_BENCHMARKS)
-        .result("valkeyInDiskLFU-memory-free.json")
-        .build();
-
-    this.withValkey(CONFIG_IN_DISK_LFU, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
-  }
-
-  @Test
-  public void dragonflydb() {
-    Options opt = createBuilder(DRAGONFLY_BENCHMARKS)
-        .result("dragonflydb-memory-free.json")
-        .build();
-
-    this.withDragonfly(DRAGONFLYDB_CONFIG, () -> {
-      try {
-        new Runner(opt).run();
-      } catch (RunnerException e) {
-        Assertions.fail(e.getMessage());
-      }
-    });
+    this.withDragonfly(
+        redisConfig.toString(), () -> {
+          try {
+            new Runner(opt).run();
+          } catch (RunnerException e) {
+            Assertions.fail(e.getMessage());
+          }
+        }
+    );
   }
 
   private static ChainedOptionsBuilder createBuilder(List<String> benchmarks) {
