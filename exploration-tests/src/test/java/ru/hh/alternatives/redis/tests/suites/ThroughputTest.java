@@ -35,8 +35,8 @@ public class ThroughputTest extends AbstractBenchmark {
 
   private static Stream<Arguments> redisConfigs() {
     String container = "redis";
-    RedisConfig diskRedisConfig = new RedisConfig().onDisk().withThreads(IO_THREADS);
-    RedisConfig memoryRedisConfig = new RedisConfig().inMemory().withThreads(IO_THREADS);
+    RedisConfig diskRedisConfig = new RedisConfig().onDisk().withThreads(IO_THREADS - 1);
+    RedisConfig memoryRedisConfig = new RedisConfig().inMemory().withThreads(IO_THREADS - 1);
     return Stream.of(
         Arguments.of(
             "%s-%s-disk-lru".formatted(ThroughputTest.class.getSimpleName(), container),
@@ -79,8 +79,8 @@ public class ThroughputTest extends AbstractBenchmark {
 
   private static Stream<Arguments> valkeyConfigs() {
     String container = "valkey";
-    RedisConfig diskRedisConfig = new RedisConfig().onDisk().withThreads(IO_THREADS);
-    RedisConfig memoryRedisConfig = new RedisConfig().inMemory().withThreads(IO_THREADS);
+    RedisConfig diskRedisConfig = new RedisConfig().onDisk().withThreads(IO_THREADS - 1);
+    RedisConfig memoryRedisConfig = new RedisConfig().inMemory().withThreads(IO_THREADS - 1);
     return Stream.of(
         Arguments.of(
             "%s-%s-disk-lru".formatted(ThroughputTest.class.getSimpleName(), container),
