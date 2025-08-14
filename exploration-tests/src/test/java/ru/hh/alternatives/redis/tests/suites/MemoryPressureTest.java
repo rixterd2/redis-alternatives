@@ -1,9 +1,9 @@
 package ru.hh.alternatives.redis.tests.suites;
 
-import com.redis.testcontainers.RedisContainer;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
@@ -12,24 +12,11 @@ import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.testcontainers.containers.GenericContainer;
 import ru.hh.alternatives.redis.Constants;
 import ru.hh.alternatives.redis.explorationjedis.KeyValueClient;
 import ru.hh.alternatives.redis.explorationjedis.client.JedisClient;
-import ru.hh.alternatives.redis.tests.benchmarks.GlideRead;
-import ru.hh.alternatives.redis.tests.benchmarks.GlideWrite;
-import ru.hh.alternatives.redis.tests.benchmarks.JedisRead;
-import ru.hh.alternatives.redis.tests.benchmarks.JedisWrite;
-import ru.hh.alternatives.redis.tests.benchmarks.LettuceRead;
-import ru.hh.alternatives.redis.tests.benchmarks.LettuceWrite;
-import ru.hh.alternatives.redis.tests.benchmarks.RedissonRead;
-import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 
-public class MemoryPressureTest {
-  private static final GenericContainer<RedisContainer> redis = new GenericContainer<>("redis:8.0");
-  private static final GenericContainer<RedisContainer> valkey = new GenericContainer<>("valkey/valkey:8.0");
-  private static final GenericContainer<RedisContainer> dragonflydb = new GenericContainer<>("docker.dragonflydb.io/dragonflydb/dragonfly:latest");
-
+public class MemoryPressureTest extends AbstractBenchmark {
   private static final long CACHE_SIZE_GB = 2;
 
   // by default it uses all available cores ( 8 requires 2gb memory, 16 requires at least 4gb )
@@ -45,191 +32,147 @@ public class MemoryPressureTest {
   private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
       CACHE_SIZE_GB);
 
-  private static final List<String> REDIS_BENCHMARKS = List.of(
-      JedisRead.class.getSimpleName(),
-      LettuceRead.class.getSimpleName(),
-      RedissonRead.class.getSimpleName(),
-      JedisWrite.class.getSimpleName(),
-      LettuceWrite.class.getSimpleName(),
-      RedissonWrite.class.getSimpleName()
-  );
+  @Test
+  public void redisInMemoryLRU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInMemoryLRU-memory-pressure.json")
+        .build();
 
-  private static final List<String> VALKEY_BENCHMARKS = List.of(
-      GlideRead.class.getSimpleName(),
-      JedisRead.class.getSimpleName(),
-      LettuceRead.class.getSimpleName(),
-      RedissonRead.class.getSimpleName(),
-      GlideWrite.class.getSimpleName(),
-      JedisWrite.class.getSimpleName(),
-      LettuceWrite.class.getSimpleName(),
-      RedissonWrite.class.getSimpleName()
-  );
-
-  static {
-    redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
-    valkey.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
-    dragonflydb.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
+    this.withRedis(CONFIG_IN_MEMORY_LRU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
+      }
+    });
   }
 
   @Test
-  public void redisInMemoryLRU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LRU));
+  public void redisInMemoryLFU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInMemoryLFU-memory-pressure.json")
+        .build();
 
-    redis.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInMemoryLRU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withRedis(CONFIG_IN_MEMORY_LFU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void redisInMemoryLFU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LFU));
+  public void redisInDiskLRU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInDiskLRU-memory-pressure.json")
+        .build();
 
-    redis.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInMemoryLFU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withRedis(CONFIG_IN_DISK_LRU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void redisInDiskLRU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LRU));
+  public void redisInDiskLFU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInDiskLFU-memory-pressure.json")
+        .build();
 
-    redis.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInDiskLRU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withRedis(CONFIG_IN_DISK_LFU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void redisInDiskLFU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LFU));
+  public void valkeyInMemoryLRU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInMemoryLRU-memory-pressure.json")
+        .build();
 
-    redis.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInDiskLFU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withValkey(CONFIG_IN_MEMORY_LRU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInMemoryLRU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LRU));
+  public void valkeyInMemoryLFU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInMemoryLFU-memory-pressure.json")
+        .build();
 
-    valkey.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInMemoryLRU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withValkey(CONFIG_IN_MEMORY_LFU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInMemoryLFU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LFU));
+  public void valkeyInDiskLRU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInDiskLRU-memory-pressure.json")
+        .build();
 
-    valkey.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInMemoryLFU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withValkey(CONFIG_IN_DISK_LRU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInDiskLRU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LRU));
+  public void valkeyInDiskLFU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInDiskLFU-memory-pressure.json")
+        .build();
 
-    valkey.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInDiskLRU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withValkey(CONFIG_IN_DISK_LFU, () -> {
+      setupMemoryPressure();
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInDiskLFU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LFU));
+  public void dragonflydb() {
+    Options opt = createBuilder(DRAGONFLY_BENCHMARKS)
+        .result("dragonflydb-memory-pressure.json")
+        .build();
 
-    valkey.start();
-    setupMemoryPressure();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInDiskLFU-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withDragonfly(DRAGONFLYDB_CONFIG, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
-  }
-
-  @Test
-  public void dragonflydb() throws RunnerException {
-    dragonflydb.setCommand("dragonfly %s".formatted(DRAGONFLYDB_CONFIG));
-
-    dragonflydb.start();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("dragonflydb-memory-pressure.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (dragonflydb.isRunning()) {
-        dragonflydb.stop();
-      }
-    }
+    });
   }
 
   private static ChainedOptionsBuilder createBuilder(List<String> benchmarks) {

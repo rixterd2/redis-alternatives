@@ -3,6 +3,7 @@ package ru.hh.alternatives.redis.tests.suites;
 import com.redis.testcontainers.RedisContainer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
@@ -22,7 +23,7 @@ import ru.hh.alternatives.redis.tests.benchmarks.LettuceWrite;
 import ru.hh.alternatives.redis.tests.benchmarks.RedissonRead;
 import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 
-public class MemoryFreeTest {
+public class MemoryFreeTest extends AbstractBenchmark {
   private static final GenericContainer<RedisContainer> redis = new GenericContainer<>("redis:8.0");
   private static final GenericContainer<RedisContainer> valkey = new GenericContainer<>("valkey/valkey:8.0");
   private static final GenericContainer<RedisContainer> dragonflydb = new GenericContainer<>("docker.dragonflydb.io/dragonflydb/dragonfly:latest");
@@ -42,183 +43,139 @@ public class MemoryFreeTest {
   private static final String CONFIG_IN_MEMORY_LFU = "--maxmemory %dg --maxmemory-policy allkeys-lfu --save '' --appendonly no".formatted(
       CACHE_SIZE_GB);
 
-  private static final List<String> REDIS_BENCHMARKS = List.of(
-      JedisRead.class.getSimpleName(),
-      LettuceRead.class.getSimpleName(),
-      RedissonRead.class.getSimpleName(),
-      JedisWrite.class.getSimpleName(),
-      LettuceWrite.class.getSimpleName(),
-      RedissonWrite.class.getSimpleName()
-  );
+  @Test
+  public void redisInMemoryLRU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInMemoryLRU-memory-free.json")
+        .build();
 
-  private static final List<String> VALKEY_BENCHMARKS = List.of(
-      GlideRead.class.getSimpleName(),
-      JedisRead.class.getSimpleName(),
-      LettuceRead.class.getSimpleName(),
-      RedissonRead.class.getSimpleName(),
-      GlideWrite.class.getSimpleName(),
-      JedisWrite.class.getSimpleName(),
-      LettuceWrite.class.getSimpleName(),
-      RedissonWrite.class.getSimpleName()
-  );
-
-  static {
-    redis.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
-    valkey.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
-    dragonflydb.setPortBindings(List.of("%d:%d/tcp".formatted(Constants.PORT, Constants.PORT)));
+    this.withRedis(CONFIG_IN_MEMORY_LRU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
+      }
+    });
   }
 
   @Test
-  public void redisInMemoryLRU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LRU));
+  public void redisInMemoryLFU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInMemoryLFU-memory-free.json")
+        .build();
 
-    redis.start();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInMemoryLRU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withRedis(CONFIG_IN_MEMORY_LFU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void redisInMemoryLFU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_MEMORY_LFU));
+  public void redisInDiskLRU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInDiskLRU-memory-free.json")
+        .build();
 
-    redis.start();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInMemoryLFU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withRedis(CONFIG_IN_DISK_LRU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void redisInDiskLRU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LRU));
+  public void redisInDiskLFU() {
+    Options opt = createBuilder(REDIS_BENCHMARKS)
+        .result("redisInDiskLFU-memory-free.json")
+        .build();
 
-    redis.start();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInDiskLRU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withRedis(CONFIG_IN_DISK_LFU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void redisInDiskLFU() throws RunnerException {
-    redis.setCommand("redis-server %s".formatted(CONFIG_IN_DISK_LFU));
+  public void valkeyInMemoryLRU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInMemoryLRU-memory-free.json")
+        .build();
 
-    redis.start();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("redisInDiskLFU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (redis.isRunning()) {
-        redis.stop();
+    this.withValkey(CONFIG_IN_MEMORY_LRU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInMemoryLRU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LRU));
+  public void valkeyInMemoryLFU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInMemoryLFU-memory-free.json")
+        .build();
 
-    valkey.start();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInMemoryLRU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withValkey(CONFIG_IN_MEMORY_LFU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInMemoryLFU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_MEMORY_LFU));
+  public void valkeyInDiskLRU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInDiskLRU-memory-free.json")
+        .build();
 
-    valkey.start();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInMemoryLFU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withValkey(CONFIG_IN_DISK_LRU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInDiskLRU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LRU));
+  public void valkeyInDiskLFU() {
+    Options opt = createBuilder(VALKEY_BENCHMARKS)
+        .result("valkeyInDiskLFU-memory-free.json")
+        .build();
 
-    valkey.start();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInDiskLRU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withValkey(CONFIG_IN_DISK_LFU, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
+    });
   }
 
   @Test
-  public void valkeyInDiskLFU() throws RunnerException {
-    valkey.setCommand("valkey-server %s".formatted(CONFIG_IN_DISK_LFU));
+  public void dragonflydb() {
+    Options opt = createBuilder(DRAGONFLY_BENCHMARKS)
+        .result("dragonflydb-memory-free.json")
+        .build();
 
-    valkey.start();
-    try {
-      Options opt = createBuilder(VALKEY_BENCHMARKS)
-          .result("valkeyInDiskLFU-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (valkey.isRunning()) {
-        valkey.stop();
+    this.withDragonfly(DRAGONFLYDB_CONFIG, () -> {
+      try {
+        new Runner(opt).run();
+      } catch (RunnerException e) {
+        Assertions.fail(e.getMessage());
       }
-    }
-  }
-
-  @Test
-  public void dragonflydb() throws RunnerException {
-    dragonflydb.setCommand("dragonfly %s".formatted(DRAGONFLYDB_CONFIG));
-
-    dragonflydb.start();
-    try {
-      Options opt = createBuilder(REDIS_BENCHMARKS)
-          .result("dragonflydb-memory-free.json")
-          .build();
-      new Runner(opt).run();
-    } finally {
-      if (dragonflydb.isRunning()) {
-        dragonflydb.stop();
-      }
-    }
+    });
   }
 
   private static ChainedOptionsBuilder createBuilder(List<String> benchmarks) {
