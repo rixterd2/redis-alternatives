@@ -70,7 +70,7 @@ public class MemoryFreeTest extends AbstractBenchmark {
   }
 
   private static Stream<Arguments> dragonflyConfigs() {
-    DragonflyConfig diskRedisConfig = new DragonflyConfig().onDisk();
+    DragonflyConfig diskRedisConfig = new DragonflyConfig();
     return Stream.of(
         Arguments.of(
             "%s-dragonfly-disk-eviction".formatted(MemoryFreeTest.class.getSimpleName()),

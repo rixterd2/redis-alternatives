@@ -154,12 +154,6 @@ public abstract class AbstractBenchmark {
       return new DragonflyConfig(builder);
     }
 
-    public DragonflyConfig onDisk() {
-      builder.append("--snapshot_cron ''");
-      builder.append(" ");
-      return new DragonflyConfig(builder);
-    }
-
     public DragonflyConfig withThreads(int threads) {
       builder.append("--proactor_threads");
       builder.append(" ");

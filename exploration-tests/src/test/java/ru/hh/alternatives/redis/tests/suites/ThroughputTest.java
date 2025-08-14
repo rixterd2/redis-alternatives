@@ -82,7 +82,7 @@ public class ThroughputTest extends AbstractBenchmark {
   }
 
   private static Stream<Arguments> dragonflyConfigs() {
-    DragonflyConfig diskRedisConfig = new DragonflyConfig().onDisk().withThreads(IO_THREADS);
+    DragonflyConfig diskRedisConfig = new DragonflyConfig().withThreads(IO_THREADS);
     return Stream.of(
         Arguments.of(
             "%s-dragonfly-disk-eviction".formatted(ThroughputTest.class.getSimpleName()),
