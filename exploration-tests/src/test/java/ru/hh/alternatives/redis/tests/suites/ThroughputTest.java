@@ -43,12 +43,32 @@ public class ThroughputTest extends AbstractBenchmark {
             diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
         ),
         Arguments.of(
+            "%s-%s-disk-lru-1core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lru-4core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(4).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lru-8core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(8).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lru-12core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(12).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
             "%s-%s-disk-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
             diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
         ),
         Arguments.of(
             "%s-%s-inmemory-lru".formatted(ThroughputTest.class.getSimpleName(), container),
             memoryRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lru-1core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().inMemory().withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
         ),
         Arguments.of(
             "%s-%s-inmemory-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
@@ -67,12 +87,32 @@ public class ThroughputTest extends AbstractBenchmark {
             diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
         ),
         Arguments.of(
+            "%s-%s-disk-lru-1core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lru-4core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(4).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lru-8core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(8).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-disk-lru-12core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().onDisk().withThreads(12).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
             "%s-%s-disk-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
             diskRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lfu")
         ),
         Arguments.of(
             "%s-%s-inmemory-lru".formatted(ThroughputTest.class.getSimpleName(), container),
             memoryRedisConfig.withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
+        ),
+        Arguments.of(
+            "%s-%s-inmemory-lru-1core".formatted(ThroughputTest.class.getSimpleName(), container),
+            new RedisConfig().inMemory().withThreads(1).withMemory(CACHE_SIZE).withEvictionPolicy("allkeys-lru")
         ),
         Arguments.of(
             "%s-%s-inmemory-lfu".formatted(ThroughputTest.class.getSimpleName(), container),
@@ -87,6 +127,22 @@ public class ThroughputTest extends AbstractBenchmark {
         Arguments.of(
             "%s-dragonfly-disk-eviction".formatted(ThroughputTest.class.getSimpleName()),
             diskRedisConfig.withMemory(CACHE_SIZE).withEviction()
+        ),
+        Arguments.of(
+            "%s-dragonfly-disk-eviction-1core".formatted(ThroughputTest.class.getSimpleName()),
+            new DragonflyConfig().withThreads(1).withMemory(CACHE_SIZE).withEviction()
+        ),
+        Arguments.of(
+            "%s-dragonfly-disk-eviction-4core".formatted(ThroughputTest.class.getSimpleName()),
+            new DragonflyConfig().withThreads(4).withMemory(CACHE_SIZE).withEviction()
+        ),
+        Arguments.of(
+            "%s-dragonfly-disk-eviction-8core".formatted(ThroughputTest.class.getSimpleName()),
+            new DragonflyConfig().withThreads(8).withMemory(CACHE_SIZE).withEviction()
+        ),
+        Arguments.of(
+            "%s-dragonfly-disk-eviction-12core".formatted(ThroughputTest.class.getSimpleName()),
+            new DragonflyConfig().withThreads(12).withMemory(CACHE_SIZE).withEviction()
         ),
         Arguments.of(
             "%s-dragonfly-disk-noeviction".formatted(ThroughputTest.class.getSimpleName()),
