@@ -75,11 +75,11 @@ public class MemoryPressureTest extends AbstractBenchmark {
     return Stream.of(
         Arguments.of(
             "%s-dragonfly-disk-eviction".formatted(MemoryPressureTest.class.getSimpleName()),
-            dragonflyConfig.withMemory("%dg".formatted(CACHE_SIZE)).withEviction()
+            dragonflyConfig.withThreads(1).withMemory("%dg".formatted(CACHE_SIZE)).withEviction()
         ),
         Arguments.of(
             "%s-dragonfly-disk-noeviction".formatted(MemoryPressureTest.class.getSimpleName()),
-            dragonflyConfig.withMemory("%dg".formatted(CACHE_SIZE))
+            dragonflyConfig.withThreads(1).withMemory("%dg".formatted(CACHE_SIZE))
         )
     );
   }
