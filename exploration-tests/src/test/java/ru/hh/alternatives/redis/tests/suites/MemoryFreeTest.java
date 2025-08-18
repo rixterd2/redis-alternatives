@@ -18,9 +18,6 @@ import org.openjdk.jmh.runner.options.TimeValue;
 public class MemoryFreeTest extends AbstractBenchmark {
   private static final String CACHE_SIZE = "2g";
 
-  // by default it uses all available cores ( 8 requires 2gb memory, 16 requires at least 4gb )
-  private static final String DRAGONFLYDB_CONFIG = "--maxmemory %dg --proactor_threads %d --conn_io_threads %d".formatted(CACHE_SIZE, 1, 1);
-
   private static Stream<Arguments> redisConfigs() {
     String container = "redis";
     RedisConfig diskRedisConfig = new RedisConfig().onDisk();
@@ -70,15 +67,15 @@ public class MemoryFreeTest extends AbstractBenchmark {
   }
 
   private static Stream<Arguments> dragonflyConfigs() {
-    DragonflyConfig diskRedisConfig = new DragonflyConfig();
+    DragonflyConfig dragonflyConfig = new DragonflyConfig();
     return Stream.of(
         Arguments.of(
             "%s-dragonfly-disk-eviction".formatted(MemoryFreeTest.class.getSimpleName()),
-            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE).withEviction()
+            dragonflyConfig.withThreads(1).withMemory(CACHE_SIZE).withEviction()
         ),
         Arguments.of(
             "%s-dragonfly-disk-noeviction".formatted(MemoryFreeTest.class.getSimpleName()),
-            diskRedisConfig.withThreads(1).withMemory(CACHE_SIZE)
+            dragonflyConfig.withThreads(1).withMemory(CACHE_SIZE)
         )
     );
   }
@@ -117,7 +114,7 @@ public class MemoryFreeTest extends AbstractBenchmark {
 
   @ParameterizedTest
   @MethodSource("dragonflyConfigs")
-  public void dragonfly(String name, RedisConfig redisConfig) {
+  public void dragonfly(String name, DragonflyConfig redisConfig) {
     Options opt = createBuilder(DRAGONFLY_BENCHMARKS).result(name).build();
 
     this.withDragonfly(

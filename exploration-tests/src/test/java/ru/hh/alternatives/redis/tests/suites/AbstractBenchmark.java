@@ -114,7 +114,6 @@ public abstract class AbstractBenchmark {
     public RedisConfig withThreads(int threads) {
       builder.append("--io-threads");
       builder.append(" ");
-      // main thread is not taken into account
       builder.append(threads);
       builder.append(" ");
       return new RedisConfig(builder);

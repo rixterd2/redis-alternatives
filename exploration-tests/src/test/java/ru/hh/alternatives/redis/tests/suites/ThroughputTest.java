@@ -30,7 +30,6 @@ import ru.hh.alternatives.redis.tests.benchmarks.RedissonWrite;
 
 public class ThroughputTest extends AbstractBenchmark {
   private static final String CACHE_SIZE = "10g";
-  // see redis.conf documentation, main thread is not taken into account thus we have to reduce the value by 1
   private static final int IO_THREADS = Runtime.getRuntime().availableProcessors();
 
   private static Stream<Arguments> redisConfigs() {
@@ -122,11 +121,11 @@ public class ThroughputTest extends AbstractBenchmark {
   }
 
   private static Stream<Arguments> dragonflyConfigs() {
-    DragonflyConfig diskRedisConfig = new DragonflyConfig().withThreads(IO_THREADS);
+    DragonflyConfig dragonflyConfig = new DragonflyConfig().withThreads(IO_THREADS);
     return Stream.of(
         Arguments.of(
             "%s-dragonfly-disk-eviction".formatted(ThroughputTest.class.getSimpleName()),
-            diskRedisConfig.withMemory(CACHE_SIZE).withEviction()
+            dragonflyConfig.withMemory(CACHE_SIZE).withEviction()
         ),
         Arguments.of(
             "%s-dragonfly-disk-eviction-1core".formatted(ThroughputTest.class.getSimpleName()),
@@ -146,7 +145,7 @@ public class ThroughputTest extends AbstractBenchmark {
         ),
         Arguments.of(
             "%s-dragonfly-disk-noeviction".formatted(ThroughputTest.class.getSimpleName()),
-            diskRedisConfig.withMemory(CACHE_SIZE)
+            dragonflyConfig.withMemory(CACHE_SIZE)
         )
     );
   }
